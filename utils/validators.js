@@ -12,7 +12,7 @@ export const userValidators = [
 export const productValidators = [
     body('name').isLength({min: 4}),
     body('price').isFloat({min: 0}),
-    body('availability').isBoolean()
+    body('isAvailable').isBoolean()
 ]
 
 export const orderValidators = [

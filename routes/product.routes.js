@@ -36,7 +36,7 @@ router.post('/', [productValidators],
                 return res.status(400).json({errors: errors.array()});
             }
 
-            const product = new Product({...req.body})
+            const product = new Product(req.body)
             await product.save()
 
             res.status(201).json('Product added')
@@ -50,7 +50,7 @@ router.patch('/:id', [productValidators],
     async (req, res) => {
         try {
             const errors = validationResult(req)
-            const params = {...req.body}
+            const params = req.body
             if (!errors.isEmpty()) {
                 for (let error of errors.array()) {
                     if (error.param in params) {

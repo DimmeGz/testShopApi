@@ -60,7 +60,7 @@ router.patch('/:id', [userValidators],
     async (req, res) => {
         try {
             const errors = validationResult(req)
-            const params = {...req.body}
+            const params = req.body
             if (!errors.isEmpty()) {
                 for (let error of errors.array()) {
                     if (error.param in params) {

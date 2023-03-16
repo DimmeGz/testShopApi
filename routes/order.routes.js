@@ -37,7 +37,7 @@ router.post('/', [orderValidators],
                 return res.status(400).json({errors: errors.array()})
             }
 
-            const {user, product, qty} = {...req.body}
+            const {user, product, qty} = req.body
             const productInstance = await Product.findById(product)
             const sum = productInstance.price * qty
 
@@ -54,7 +54,7 @@ router.patch('/:id', [orderValidators],
     async (req, res) => {
         try {
             const errors = validationResult(req)
-            const params = {...req.body}
+            const params = req.body
             if (!errors.isEmpty()) {
                 for (let error of errors.array()) {
                     if (error.param in params) {
