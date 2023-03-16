@@ -18,10 +18,14 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const orders = await Order.findById(res.params.id)
-        res.json(orders)
+        const order = await Order.findById(req.params.id)
+        if (!order) {
+            res.status(404).json({message: 'Order does not exist'})
+            return
+        }
+        res.status(200).json(order)
     } catch (e) {
-        res.status(404).json('Bad request')
+        res.status(404).json(e)
     }
 })
 
@@ -87,7 +91,7 @@ router.patch('/:id', [orderValidators],
 router.delete('/:id', async (req, res) => {
     try {
         const order = await Order.findById(req.params.id)
-        order.deleteOne()
+        await order.deleteOne()
 
         res.status(200).json('Product deleted')
     } catch (e) {

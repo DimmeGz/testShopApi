@@ -18,9 +18,13 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id)
-        res.json(product)
+        if (!product) {
+            res.status(404).json({message: 'Product does not exist'})
+            return
+        }
+        res.status(200).json(product)
     } catch (e) {
-        res.status(500).json({message: 'something went wrong'})
+        res.status(404).json(e)
     }
 })
 
@@ -57,7 +61,7 @@ router.patch('/:id', [productValidators],
             const product = await Product.findById(req.params.id)
 
             Object.assign(product, params)
-            product.save()
+            await product.save()
 
             res.status(200).json('Product updated')
         } catch (e) {
@@ -68,7 +72,7 @@ router.patch('/:id', [productValidators],
 router.delete('/:id', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id)
-        product.deleteOne()
+        await product.deleteOne()
 
         res.status(200).json('Product deleted')
     } catch (e) {

@@ -19,9 +19,13 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
-        res.json(user)
+        if (!user) {
+            res.status(404).json({message: 'User does not exist'})
+            return
+        }
+        res.status(200).json(user)
     } catch (e) {
-        res.status(500).json({message: 'something went wrong'})
+        res.status(404).json(e)
     }
 })
 
@@ -67,7 +71,7 @@ router.patch('/:id', [userValidators],
             const user = await User.findById(req.params.id)
 
             Object.assign(user, params)
-            user.save()
+            await user.save()
 
             res.status(200).json('User updated')
         } catch (e) {
@@ -78,7 +82,7 @@ router.patch('/:id', [userValidators],
 router.delete('/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
-        user.deleteOne()
+        await user.deleteOne()
 
         res.status(200).json('User deleted')
     } catch (e) {
