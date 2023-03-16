@@ -5,7 +5,7 @@ const schema = new Schema({
     description: {type: String},
     image: {type: String},
     price: {type: Number, require: true},
-    availability: {type: Boolean, require: true}
+    isAvailable: {type: Boolean, require: true}
 })
 
 export const Product = model('Product', schema)

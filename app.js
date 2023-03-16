@@ -1,6 +1,7 @@
 import express from 'express'
 import config from 'config'
 import mongoose from 'mongoose'
+import {migrate} from './db/migrate.js'
 
 import {router as productRouter} from './routes/product.routes.js'
 import {router as userRouter} from './routes/user.routes.js'
@@ -22,6 +23,10 @@ async function start() {
             useNewUrlParser: true,
             useUnifiedTopology: true
         })
+
+        if (config.get('migrate')) {
+            await migrate()
+        }
 
         app.listen(PORT, () => {
             console.log(`Server has been started on port ${PORT}...`)
