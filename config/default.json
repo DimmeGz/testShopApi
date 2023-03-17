@@ -1,0 +1,6 @@
+{
+  "port": 5000,
+  "mongoUri": "mongodb+srv://dimaserhiienko:0mtAuAmWgckqC1fC@testshop.9ts8k0j.mongodb.net/?retryWrites=true&w=majority",
+  "migrate": 0,
+  "migrationType": "up"
+}
