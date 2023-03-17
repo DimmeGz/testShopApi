@@ -1,19 +1,15 @@
-import config from 'config'
 import { MongoClient } from 'mongodb'
 import { ConnectOptions } from 'mongoose'
 import migrations from './migrations/index'
 import {Migration} from './schema'
 
-const MONGO_URL: string = config.get('mongoUri')
-const migrationType = config.get('migrationType')
-
-export const getDb = async () => {
+export const getDb = async (MONGO_URL: string) => {
     const client = await MongoClient.connect(MONGO_URL, { useUnifiedTopology: true } as ConnectOptions)
     return client.db()
 }
 
-export const migrate = async () => {
-    const db = await getDb()
+export const migrate = async (MONGO_URL: string, migrationType: string) => {
+    const db = await getDb(MONGO_URL)
 
     //get all performed migrations names from DB
     const performedMigrations = await Migration.find()
