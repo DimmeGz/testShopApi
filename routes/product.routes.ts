@@ -1,8 +1,8 @@
-import {Router} from 'express'
-import {validationResult} from 'express-validator'
+import express, {Router} from 'express'
+import {body, validationResult} from 'express-validator'
 
-import {Product} from '../models/Product.js'
-import {productValidators} from "../utils/validators.js"
+import {Product} from '../models/Product'
+import {productValidators} from "../utils/validators"
 
 export const router = Router()
 
@@ -28,14 +28,14 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.post('/', [productValidators],
-    async (req, res) => {
+router.post('/',
+    productValidators,
+    async (req: express.Request, res: express.Response) => {
         try {
-            const errors = validationResult(req);
+            const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 return res.status(400).json({errors: errors.array()});
             }
-
             const product = new Product(req.body)
             await product.save()
 
@@ -46,8 +46,9 @@ router.post('/', [productValidators],
         }
     })
 
-router.patch('/:id', [productValidators],
-    async (req, res) => {
+router.patch('/:id',
+    productValidators,
+    async (req: express.Request, res: express.Response) => {
         try {
             const errors = validationResult(req)
             const params = req.body
@@ -60,9 +61,12 @@ router.patch('/:id', [productValidators],
             }
             const product = await Product.findById(req.params.id)
 
+            if (!product) {
+                res.status(404).json({message: 'Product does not exist'})
+                return
+            }
             Object.assign(product, params)
             await product.save()
-
             res.status(200).json('Product updated')
         } catch (e) {
             res.status(404).json({message: 'Bad request'})
@@ -72,8 +76,11 @@ router.patch('/:id', [productValidators],
 router.delete('/:id', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id)
+        if (!product) {
+            res.status(404).json({message: 'Product does not exist'})
+            return
+        }
         await product.deleteOne()
-
         res.status(200).json('Product deleted')
     } catch (e) {
         res.status(404).json({message: 'Bad request'})

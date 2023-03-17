@@ -1,6 +1,6 @@
 import {body} from "express-validator"
-import {Product} from "../models/Product.ts"
-import {User} from "../models/User.js"
+import {Product} from "../models/Product"
+import {User} from "../models/User"
 
 export const userValidators = [
     body('name').isLength({min: 4}),

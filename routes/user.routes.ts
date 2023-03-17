@@ -1,9 +1,9 @@
-import {Router} from 'express'
+import express, {Router} from 'express'
 import bcrypt from 'bcryptjs'
 import {validationResult} from "express-validator"
 
-// import {userValidators} from "../utils/validators"
-import {User} from '../models/User.js'
+import {userValidators} from "../utils/validators"
+import {User} from '../models/User'
 
 export const router = Router()
 
@@ -29,8 +29,9 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.post('/', [userValidators],
-    async (req, res) => {
+router.post('/',
+    userValidators,
+    async (req: express.Request, res: express.Response) => {
         try {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
@@ -56,8 +57,9 @@ router.post('/', [userValidators],
         }
     })
 
-router.patch('/:id', [userValidators],
-    async (req, res) => {
+router.patch('/:id',
+    userValidators,
+    async (req: express.Request, res: express.Response) => {
         try {
             const errors = validationResult(req)
             const params = req.body
@@ -70,9 +72,12 @@ router.patch('/:id', [userValidators],
             }
             const user = await User.findById(req.params.id)
 
+            if (!user) {
+                res.status(404).json({message: 'User does not exist'})
+                return
+            }
             Object.assign(user, params)
             await user.save()
-
             res.status(200).json('User updated')
         } catch (e) {
             res.status(404).json({message: 'Bad request'})
@@ -82,8 +87,11 @@ router.patch('/:id', [userValidators],
 router.delete('/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
+        if (!user) {
+            res.status(404).json({message: 'User does not exist'})
+            return
+        }
         await user.deleteOne()
-
         res.status(200).json('User deleted')
     } catch (e) {
         res.status(404).json({message: 'Bad request'})

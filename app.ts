@@ -1,17 +1,19 @@
 import express from 'express'
 import config from 'config'
-import mongoose from 'mongoose'
-import {migrate} from './db/migrate.js'
+import mongoose, { ConnectOptions } from 'mongoose'
+import {migrate} from './db/migrate'
+import bodyParser  from'body-parser'
 
-import {router as productRouter} from './routes/product.routes.js'
-import {router as userRouter} from './routes/user.routes.js'
-import {router as orderRouter} from './routes/order.routes.js'
+import {router as productRouter} from './routes/product.routes'
+import {router as userRouter} from './routes/user.routes'
+import {router as orderRouter} from './routes/order.routes'
 
-const PORT = config.get('port') || 5000
+const PORT: number = config.get('port') || 5000
 
 const app = express()
 
-app.use(express.json({extended: true}))
+app.use(bodyParser.json())
+app.use(express.json())
 
 app.use('/api/product', productRouter)
 app.use('/api/user', userRouter)
@@ -22,7 +24,7 @@ async function start() {
         await mongoose.connect(config.get('mongoUri'), {
             useNewUrlParser: true,
             useUnifiedTopology: true
-        })
+        } as ConnectOptions)
 
         if (config.get('migrate')) {
             await migrate()
@@ -32,7 +34,10 @@ async function start() {
             console.log(`Server has been started on port ${PORT}...`)
         })
     } catch (e) {
-        console.log('Server Error', e.message)
+        if (e instanceof Error) {
+            console.log('Server Error', e.message)
+            process.exit(1)
+        }
         process.exit(1)
     }
 }
