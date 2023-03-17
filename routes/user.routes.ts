@@ -2,7 +2,7 @@ import {Router} from 'express'
 import bcrypt from 'bcryptjs'
 import {validationResult} from "express-validator"
 
-import {userValidators} from "../utils/validators.js"
+// import {userValidators} from "../utils/validators"
 import {User} from '../models/User.js'
 
 export const router = Router()

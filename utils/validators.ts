@@ -1,5 +1,5 @@
-import {body, check} from "express-validator"
-import {Product} from "../models/Product.js"
+import {body} from "express-validator"
+import {Product} from "../models/Product.ts"
 import {User} from "../models/User.js"
 
 export const userValidators = [

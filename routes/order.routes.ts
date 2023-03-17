@@ -1,8 +1,8 @@
 import {Router} from 'express'
 import {validationResult} from "express-validator"
 import {Order} from '../models/Order.js'
-import {Product} from '../models/Product.js'
-import {orderValidators, productValidators} from '../utils/validators.js'
+import {Product} from '../models/Product.ts'
+// import {orderValidators} from '../utils/validators'
 
 
 export const router = Router()
