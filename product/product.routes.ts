@@ -1,7 +1,7 @@
 import express, {Router} from 'express'
 import {validationResult} from 'express-validator'
 
-import {Product} from './Product.schema'
+import {Product} from './product.schema'
 import {productValidators} from "./product.validators"
 
 export const router = Router()

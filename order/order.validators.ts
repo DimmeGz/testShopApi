@@ -1,6 +1,6 @@
 import {body} from "express-validator"
-import {Product} from "../product/Product.schema"
-import {User} from "../user/User.schema"
+import {Product} from "../product/product.schema"
+import {User} from "../user/user.schema"
 
 export const orderValidators = [
     body('user')

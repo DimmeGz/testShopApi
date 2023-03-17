@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import {validationResult} from "express-validator"
 
 import {userValidators} from "./user.validators"
-import {User} from './User.schema'
+import {User} from './user.schema'
 
 export const router = Router()
 

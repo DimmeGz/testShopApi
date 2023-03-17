@@ -1,7 +1,7 @@
 import express, {Router} from 'express'
 import {validationResult} from "express-validator"
-import {Order} from './Order.schema'
-import {Product} from '../product/Product.schema'
+import {Order} from './order.schema'
+import {Product} from '../product/product.schema'
 import {orderValidators} from './order.validators'
 
 
