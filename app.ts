@@ -4,9 +4,9 @@ import mongoose, { ConnectOptions } from 'mongoose'
 import {migrate} from './db/migrate'
 import bodyParser  from'body-parser'
 
-import {router as productRouter} from './routes/product.routes'
-import {router as userRouter} from './routes/user.routes'
-import {router as orderRouter} from './routes/order.routes'
+import {router as productRouter} from './product/product.routes'
+import {router as userRouter} from './user/user.routes'
+import {router as orderRouter} from './order/order.routes'
 
 const PORT: number = config.get('port') || 5000
 

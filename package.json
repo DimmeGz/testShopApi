@@ -21,8 +21,8 @@
     "typescript": "^4.9.5"
   },
   "scripts": {
-    "serve": "nodemon dist/app.js",
-    "start": "node dist/app.js"
+    "serve": "tsc && nodemon dist/app.js",
+    "start": "tsc && node dist/app.js"
   },
   "keywords": [],
   "author": "",
