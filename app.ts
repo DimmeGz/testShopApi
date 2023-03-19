@@ -1,5 +1,7 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
+import Joi from 'joi'
+import fs from 'fs/promises'
 
 import express from 'express'
 import mongoose, { ConnectOptions } from 'mongoose'
@@ -23,16 +25,41 @@ app.use('/api/order', orderRouter)
 
 async function start() {
     try {
-        if (!process.env.mongoURL) {
+        const joiSchema = Joi.object({
+            S3_BUCKET: Joi.string().required(),
+            SECRET_KEY: Joi.string().required(),
+            MONGO_URL: Joi.string().required(),
+            PORT: Joi.string().required(),
+            MIGRATE: Joi.string().optional().allow(''),
+            MIGRATION_TYPE: Joi.string().default('up').required()
+        })
+        const envValues: {[key: string]: any} = {}
+
+        await fs.readFile('.env', 'utf8').then(data => {
+            const lines = data.split('\n')
+            for (let line of lines) {
+                const element = line.split(/=(.*)/s)
+                envValues[element[0]] = element[1]
+            }
+        })
+
+        try {
+            await joiSchema.validateAsync(envValues)
+        }
+        catch (err) {
+            throw new Error('.env values error')
+        }
+
+        if (!process.env.MONGO_URL) {
             throw new Error('Database URL error')
         }
-        await mongoose.connect(process.env.mongoURL, {
+        await mongoose.connect(process.env.MONGO_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         } as ConnectOptions)
 
-        if (!!process.env.migrate && process.env.migrationType) {
-            await migrate(process.env.mongoURL, process.env.migrationType)
+        if (!!process.env.MIGRATE && process.env.MIGRATION_TYPE) {
+            await migrate(process.env.MONGO_URL, process.env.MIGRATION_TYPE)
         }
         app.listen(PORT, () => {
             console.log(`Server has been started on port ${PORT}...`)
