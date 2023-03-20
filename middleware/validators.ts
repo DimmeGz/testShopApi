@@ -7,39 +7,22 @@ import {Product} from "../product/product.schema";
 const phoneJoi = Joi.extend(require('joi-phone-number'))
 const JoiObjectId = require('joi-objectid')(Joi)
 
-const userPostJoiSchema = Joi.object({
+const userSchema = {
     name: Joi.string()
         .min(4)
-        .max(30)
-        .required(),
+        .max(30),
     phone: phoneJoi.string()
         .phoneNumber({defaultCountry: 'uk-UA'})
-        .required()
         .messages({'phoneNumber.invalid': 'Required format:+38AAABBBCCDD'}),
     email: Joi.string()
-        .email({minDomainSegments: 2})
-        .required(),
+        .email({minDomainSegments: 2}),
     password: Joi.string()
         .min(6)
-        .required()
-})
+}
 
-const userPatchJoiSchema = Joi.object({
-    name: Joi.string()
-        .min(4)
-        .max(30)
-        .optional(),
-    phone: phoneJoi.string()
-        .phoneNumber({defaultCountry: 'uk-UA'})
-        .optional()
-        .messages({'phoneNumber.invalid': 'Required format:+38AAABBBCCDD'}),
-    email: Joi.string()
-        .email({minDomainSegments: 2})
-        .optional(),
-    password: Joi.string()
-        .min(6)
-        .optional()
-})
+const userPostJoiSchema = Joi.object(userSchema)
+    .fork(Object.keys(userSchema), (schema) => schema.required())
+const userPatchJoiSchema = Joi.object(userSchema)
 
 const productSchema = {
     name: Joi.string()
@@ -83,7 +66,6 @@ const existingProduct = async (value: string) => {
         }
     }
 }
-
 
 const orderPostJoiSchema = Joi.object({
     user: JoiObjectId()
