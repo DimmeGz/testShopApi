@@ -1,8 +1,6 @@
 import express, {Router} from 'express'
 import bcrypt from 'bcryptjs'
-import {validationResult} from "express-validator"
 
-import {userValidators} from "./user.validators"
 import {User} from './user.schema'
 
 export const router = Router()
@@ -30,14 +28,8 @@ router.get('/:id', async (req, res) => {
 })
 
 router.post('/',
-    userValidators,
     async (req: express.Request, res: express.Response) => {
         try {
-            const errors = validationResult(req)
-            if (!errors.isEmpty()) {
-                return res.status(400).json({errors: errors.array()})
-            }
-
             const {name, phone, email, password} = req.body
 
             const existingUser = await User.findOne({phone})
@@ -58,18 +50,9 @@ router.post('/',
     })
 
 router.patch('/:id',
-    userValidators,
     async (req: express.Request, res: express.Response) => {
         try {
-            const errors = validationResult(req)
             const params = req.body
-            if (!errors.isEmpty()) {
-                for (let error of errors.array()) {
-                    if (error.param in params) {
-                        return res.status(400).json({errors: error})
-                    }
-                }
-            }
             const user = await User.findById(req.params.id)
 
             if (!user) {

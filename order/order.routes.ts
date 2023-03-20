@@ -1,8 +1,6 @@
 import express, {Router} from 'express'
-import {validationResult} from "express-validator"
 import {Order} from './order.schema'
 import {Product} from '../product/product.schema'
-import {orderValidators} from './order.validators'
 
 
 export const router = Router()
@@ -30,14 +28,8 @@ router.get('/:id', async (req, res) => {
 })
 
 router.post('/',
-    orderValidators,
     async (req: express.Request, res: express.Response) => {
         try {
-            const errors = validationResult(req)
-            if (!errors.isEmpty()) {
-                return res.status(400).json({errors: errors.array()})
-            }
-
             const {user, product, qty} = req.body
             const productInstance = await Product.findById(product)
             if (productInstance?.price) {
@@ -56,18 +48,9 @@ router.post('/',
     })
 
 router.patch('/:id',
-    orderValidators,
     async (req: express.Request, res: express.Response) => {
         try {
-            const errors = validationResult(req)
             const params = req.body
-            if (!errors.isEmpty()) {
-                for (let error of errors.array()) {
-                    if (error.param in params) {
-                        return res.status(400).json({errors: error})
-                    }
-                }
-            }
             const order = await Order.findById(req.params.id)
 
             if (!order) {

@@ -1,8 +1,6 @@
 import express, {Router} from 'express'
-import {validationResult} from 'express-validator'
 
 import {Product} from './product.schema'
-import {productValidators} from "./product.validators"
 
 export const router = Router()
 
@@ -29,13 +27,13 @@ router.get('/:id', async (req, res) => {
 })
 
 router.post('/',
-    productValidators,
     async (req: express.Request, res: express.Response) => {
         try {
-            const errors = validationResult(req)
-            if (!errors.isEmpty()) {
-                return res.status(400).json({errors: errors.array()});
+            const existingProduct = await Product.findOne({name: req.body.name})
+            if (existingProduct) {
+                return res.status(400).json({message: 'Such product exists'})
             }
+
             const product = new Product(req.body)
             await product.save()
 
@@ -47,18 +45,9 @@ router.post('/',
     })
 
 router.patch('/:id',
-    productValidators,
     async (req: express.Request, res: express.Response) => {
         try {
-            const errors = validationResult(req)
             const params = req.body
-            if (!errors.isEmpty()) {
-                for (let error of errors.array()) {
-                    if (error.param in params) {
-                        return res.status(400).json({errors: error})
-                    }
-                }
-            }
             const product = await Product.findById(req.params.id)
 
             if (!product) {
