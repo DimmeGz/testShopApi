@@ -13,10 +13,7 @@ export const migrate = async (MONGO_URL: string, migrationType: string) => {
 
     //get all performed migrations names from DB
     const performedMigrations = await Migration.find()
-    let migrationNames = []
-    for (let mig of performedMigrations) {
-        migrationNames.push(mig.name)
-    }
+    const migrationNames = performedMigrations.map(m => m.name)
 
     for await (const m of Object.entries(migrations)) {
         const [name, func] = m
