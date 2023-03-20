@@ -41,37 +41,20 @@ const userPatchJoiSchema = Joi.object({
         .optional()
 })
 
-const productPostJoiSchema = Joi.object({
+const productSchema = {
     name: Joi.string()
         .min(4)
-        .max(30)
-        .required(),
+        .max(30),
     price: Joi.number()
-        .min(0)
-        .required(),
-    isAvailable: Joi.boolean()
-        .required(),
-    description: Joi.string()
-        .optional(),
+        .min(0),
+    isAvailable: Joi.boolean(),
+    description: Joi.string(),
     image: Joi.string()
-        .optional()
-})
+}
 
-const productPatchJoiSchema = Joi.object({
-    name: Joi.string()
-        .min(4)
-        .max(30)
-        .optional(),
-    price: Joi.number()
-        .min(0)
-        .optional(),
-    isAvailable: Joi.boolean()
-        .optional(),
-    description: Joi.string()
-        .optional(),
-    image: Joi.string()
-        .optional()
-})
+const productPostJoiSchema = Joi.object(productSchema)
+    .fork(Object.keys(productSchema), (schema) => schema.required())
+const productPatchJoiSchema = Joi.object(productSchema)
 
 const existingUser = async (value: string) => {
     if (value) {
