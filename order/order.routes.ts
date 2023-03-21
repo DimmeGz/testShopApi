@@ -2,14 +2,21 @@ import express, {Router} from 'express'
 import {Order} from './order.schema'
 import {Product} from '../product/product.schema'
 import passport from "../middleware/passport"
+import {User} from "../user/user.schema";
 
 export const router = Router()
 
 router.get('/',
     async (req, res) => {
     try {
-        const orders = await Order.find({user: req.user})
-        res.json(orders)
+        // @ts-ignore
+        if (req.user.role === 'admin') {
+            const orders = await Order.find()
+            res.json(orders)
+        } else {
+            const orders = await Order.find({user: req.user})
+            res.json(orders)
+        }
     } catch (e) {
         res.status(404).json('Bad request')
     }
@@ -23,7 +30,8 @@ router.get('/:id',
             res.status(404).json({message: 'Order does not exist'})
             return
         }
-        if (order.user !== req.user) {
+        // @ts-ignore
+        if (order.user !== req.user || req.user.role !== 'admin') {
             res.status(403).json({message: 'You don\'t have permission to access this resource'})
             return
         }
@@ -36,12 +44,19 @@ router.get('/:id',
 router.post('/',
     async (req: express.Request, res: express.Response) => {
         try {
+            const activeUser = await User.findById(req.user)
             const {product, qty} = req.body
+            let {user} = req.body
             const productInstance = await Product.findById(product)
+            // @ts-ignore
+            if (activeUser.role !== 'admin') {
+                user = req.user
+            }
+
             if (productInstance?.price) {
                 const sum = productInstance.price * qty
 
-                const order = new Order({user: req.user, product, qty, sum})
+                const order = new Order({user, product, qty, sum})
                 await order.save()
 
                 res.status(201).json('Order added')
@@ -63,7 +78,8 @@ router.patch('/:id',
                 res.status(404).json({message: 'Order does not exist'})
                 return
             }
-            if (order.user !== req.user) {
+            // @ts-ignore
+            if (order.user !== req.user || req.user.role !== 'admin') {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
                 return
             }
@@ -100,6 +116,11 @@ router.delete('/:id', async (req, res) => {
         const order = await Order.findById(req.params.id)
         if (!order) {
             res.status(404).json({message: 'Order does not exist'})
+            return
+        }
+        // @ts-ignore
+        if (order.user !== req.user || req.user.role !== 'admin') {
+            res.status(403).json({message: 'You don\'t have permission to access this resource'})
             return
         }
         await order.deleteOne()

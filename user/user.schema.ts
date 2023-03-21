@@ -6,6 +6,7 @@ interface IUser {
     password: string
     phone: string
     email: string
+    role: string
 }
 
 // Put all user instance methods in this interface:

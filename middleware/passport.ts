@@ -44,7 +44,8 @@ passport.use(
         },
         async (token: any, done: any) => {
             try {
-                return done(null, token.user);
+                const activeUser = await User.findById(token.user)
+                return done(null, activeUser);
             } catch (error) {
                 done(error)
             }
