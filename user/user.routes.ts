@@ -55,6 +55,10 @@ router.patch('/:id',
             const params = req.body
             const user = await User.findById(req.params.id)
 
+            if (params.password) {
+                params.password = await bcrypt.hash(params.password, 12)
+            }
+
             if (!user) {
                 res.status(404).json({message: 'User does not exist'})
                 return
