@@ -1,25 +1,19 @@
-import config from 'config'
 import { MongoClient } from 'mongodb'
-import migrations from './migrations/index.js'
-import {Migration} from './schema.js'
+import { ConnectOptions } from 'mongoose'
+import migrations from './migrations/index'
+import {Migration} from './schema'
 
-const MONGO_URL = config.get('mongoUri')
-const migrationType = config.get('migrationType')
-
-export const getDb = async () => {
-    const client = await MongoClient.connect(MONGO_URL, { useUnifiedTopology: true });
+export const getDb = async (MONGO_URL: string) => {
+    const client = await MongoClient.connect(MONGO_URL, { useUnifiedTopology: true } as ConnectOptions)
     return client.db()
-};
+}
 
-export const migrate = async () => {
-    const db = await getDb()
+export const migrate = async (MONGO_URL: string, migrationType: string) => {
+    const db = await getDb(MONGO_URL)
 
     //get all performed migrations names from DB
     const performedMigrations = await Migration.find()
-    let migrationNames = []
-    for (let mig of performedMigrations) {
-        migrationNames.push(mig.name)
-    }
+    const migrationNames = performedMigrations.map(m => m.name)
 
     for await (const m of Object.entries(migrations)) {
         const [name, func] = m
@@ -39,6 +33,10 @@ export const migrate = async () => {
             } else {
                 await func.down(db)
                 const declinedMigration = await Migration.findOne({name})
+                if (!declinedMigration) {
+                    console.log(`Migration ${name} doesn't provided yet`)
+                    return
+                }
                 await declinedMigration.deleteOne()
                 console.log(`Migration ${name} cancel successfully`)
             }

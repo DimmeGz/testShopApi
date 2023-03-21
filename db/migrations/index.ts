@@ -1,3 +1,3 @@
-import pruductUpdateField from './pruductUpdateField.js'
+import pruductUpdateField from './pruductUpdateField'
 
 export default {"pruductUpdateField": pruductUpdateField}

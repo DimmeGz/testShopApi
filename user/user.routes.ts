@@ -1,9 +1,7 @@
-import {Router} from 'express'
+import express, {Router} from 'express'
 import bcrypt from 'bcryptjs'
-import {validationResult} from "express-validator"
 
-import {userValidators} from "../utils/validators.js"
-import {User} from '../models/User.js'
+import {User} from './user.schema'
 
 export const router = Router()
 
@@ -29,14 +27,9 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.post('/', [userValidators],
-    async (req, res) => {
+router.post('/',
+    async (req: express.Request, res: express.Response) => {
         try {
-            const errors = validationResult(req)
-            if (!errors.isEmpty()) {
-                return res.status(400).json({errors: errors.array()})
-            }
-
             const {name, phone, email, password} = req.body
 
             const existingUser = await User.findOne({phone})
@@ -56,23 +49,18 @@ router.post('/', [userValidators],
         }
     })
 
-router.patch('/:id', [userValidators],
-    async (req, res) => {
+router.patch('/:id',
+    async (req: express.Request, res: express.Response) => {
         try {
-            const errors = validationResult(req)
             const params = req.body
-            if (!errors.isEmpty()) {
-                for (let error of errors.array()) {
-                    if (error.param in params) {
-                        return res.status(400).json({errors: error})
-                    }
-                }
-            }
             const user = await User.findById(req.params.id)
 
+            if (!user) {
+                res.status(404).json({message: 'User does not exist'})
+                return
+            }
             Object.assign(user, params)
             await user.save()
-
             res.status(200).json('User updated')
         } catch (e) {
             res.status(404).json({message: 'Bad request'})
@@ -82,8 +70,11 @@ router.patch('/:id', [userValidators],
 router.delete('/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
+        if (!user) {
+            res.status(404).json({message: 'User does not exist'})
+            return
+        }
         await user.deleteOne()
-
         res.status(200).json('User deleted')
     } catch (e) {
         res.status(404).json({message: 'Bad request'})
