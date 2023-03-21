@@ -24,20 +24,37 @@ const userPostJoiSchema = Joi.object(userSchema)
     .fork(Object.keys(userSchema), (schema) => schema.required())
 const userPatchJoiSchema = Joi.object(userSchema)
 
-const productSchema = {
+const productPostJoiSchema = Joi.object({
     name: Joi.string()
         .min(4)
-        .max(30),
+        .max(30)
+        .required(),
     price: Joi.number()
-        .min(0),
-    isAvailable: Joi.boolean(),
-    description: Joi.string(),
+        .min(0)
+        .required(),
+    isAvailable: Joi.boolean()
+        .required(),
+    description: Joi.string()
+        .optional(),
     image: Joi.string()
-}
+        .optional()
+})
 
-const productPostJoiSchema = Joi.object(productSchema)
-    .fork(Object.keys(productSchema), (schema) => schema.required())
-const productPatchJoiSchema = Joi.object(productSchema)
+const productPatchJoiSchema = Joi.object({
+    name: Joi.string()
+        .min(4)
+        .max(30)
+        .optional(),
+    price: Joi.number()
+        .min(0)
+        .optional(),
+    isAvailable: Joi.boolean()
+        .optional(),
+    description: Joi.string()
+        .optional(),
+    image: Joi.string()
+        .optional()
+})
 
 const existingUser = async (value: string) => {
     if (value) {
@@ -67,7 +84,7 @@ const existingProduct = async (value: string) => {
     }
 }
 
-const orderPostJoiSchema = Joi.object({
+const orderSchema = {
     user: JoiObjectId()
         .external(existingUser)
         .required(),
@@ -78,20 +95,11 @@ const orderPostJoiSchema = Joi.object({
         .integer()
         .min(1)
         .required()
-})
+}
 
-const orderPatchJoiSchema = Joi.object({
-    user: JoiObjectId()
-        .external(existingUser)
-        .optional(),
-    product: JoiObjectId()
-        .external(existingProduct)
-        .optional(),
-    qty: Joi.number()
-        .integer()
-        .min(1)
-        .optional()
-})
+const orderPostJoiSchema = Joi.object(orderSchema)
+    .fork(Object.keys(orderSchema), (schema) => schema.required())
+const orderPatchJoiSchema = Joi.object(orderSchema)
 
 const schema: Record<string, any> = {
     user: {
