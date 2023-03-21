@@ -86,15 +86,12 @@ const existingProduct = async (value: string) => {
 
 const orderSchema = {
     user: JoiObjectId()
-        .external(existingUser)
-        .required(),
+        .external(existingUser),
     product: JoiObjectId()
-        .external(existingProduct)
-        .required(),
+        .external(existingProduct),
     qty: Joi.number()
         .integer()
         .min(1)
-        .required()
 }
 
 const orderPostJoiSchema = Joi.object(orderSchema)
