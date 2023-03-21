@@ -18,7 +18,7 @@ async function getFile () {
             const lines = data.split('\n')
             for (let line of lines) {
                 const element = line.split(/=(.*)/s)
-                envValues[element[0]] = element[1]
+                envValues[element[0]] = element[1].replace('\r', '')
             }
         })
         return envValues

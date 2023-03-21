@@ -1,3 +1,3 @@
-import pruductUpdateField from './pruductUpdateField'
+import pruductUpdateField from './productUpdateField'
 
-export default {"pruductUpdateField": pruductUpdateField}
+export default {"productUpdateField": pruductUpdateField}
