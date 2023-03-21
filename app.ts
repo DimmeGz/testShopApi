@@ -9,6 +9,7 @@ import bodyParser from 'body-parser'
 import {router as productRouter} from './product/product.routes'
 import {router as userRouter} from './user/user.routes'
 import {router as orderRouter} from './order/order.routes'
+import {router as authRouter} from './auth/auth.routes'
 
 import {getEnv} from "./utils/env_validation"
 import {dataValidation} from './middleware/validators'
@@ -21,6 +22,7 @@ app.use(dataValidation)
 
 app.use('/api/product', productRouter)
 app.use('/api/user', userRouter)
+app.use('/api/auth', authRouter)
 app.use('/api/order', orderRouter)
 
 async function start() {

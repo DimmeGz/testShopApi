@@ -98,6 +98,23 @@ const orderPostJoiSchema = Joi.object(orderSchema)
     .fork(Object.keys(orderSchema), (schema) => schema.required())
 const orderPatchJoiSchema = Joi.object(orderSchema)
 
+const authEmailJoiSchema = Joi.object({
+    auth: Joi.string()
+        .email({minDomainSegments: 2}),
+    password: Joi.string()
+        .min(6).required()
+})
+
+const authPhoneJoiSchema = Joi.object({
+    auth: phoneJoi.string()
+        .phoneNumber({defaultCountry: 'uk-UA'})
+        .messages({'phoneNumber.invalid': 'Required format:+38AAABBBCCDD'}),
+    password: Joi.string()
+        .min(6).required()
+})
+
+const authJoiSchema = Joi.alternatives(authEmailJoiSchema , authPhoneJoiSchema)
+
 const schema: Record<string, any> = {
     user: {
         POST: userPostJoiSchema,
@@ -110,6 +127,9 @@ const schema: Record<string, any> = {
     order: {
         POST: orderPostJoiSchema,
         PATCH: orderPatchJoiSchema
+    },
+    auth: {
+        POST: authJoiSchema,
     }
 }
 
