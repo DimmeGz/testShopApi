@@ -7,7 +7,8 @@ const joiSchema = Joi.object({
     MONGO_URL: Joi.string().required(),
     PORT: Joi.string().required(),
     MIGRATE: Joi.string().optional().allow(''),
-    MIGRATION_TYPE: Joi.string().default('up').required()
+    MIGRATION_TYPE: Joi.string().default('up').required(),
+    JWT_SECRET: Joi.string().required(),
 })
 
 async function getFile () {
