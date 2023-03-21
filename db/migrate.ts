@@ -15,10 +15,11 @@ export const migrate = async (MONGO_URL: string, migrationType: string) => {
     const performedMigrations = await Migration.find()
     const migrationNames = performedMigrations.map(m => m.name)
 
-    for await (const m of Object.entries(migrations)) {
-        const [name, func] = m
 
-        if (migrationType === 'up') {
+    if (migrationType === 'up') {
+        for await (const m of Object.entries(migrations)) {
+            const [name, func] = m
+
             if (!migrationNames.includes(name)) {
                 await func.up(db)
                 const newMigration = new Migration ({name, date: Date.now()})
@@ -27,19 +28,16 @@ export const migrate = async (MONGO_URL: string, migrationType: string) => {
             } else {
                 console.log(`Migration ${name} has already been applied`)
             }
-        } else {
-            if (!migrationNames.includes(name)) {
-                console.log(`Migration ${name} has not been applied`)
-            } else {
-                await func.down(db)
-                const declinedMigration = await Migration.findOne({name})
-                if (!declinedMigration) {
-                    console.log(`Migration ${name} doesn't provided yet`)
-                    return
-                }
-                await declinedMigration.deleteOne()
-                console.log(`Migration ${name} cancel successfully`)
-            }
+        }
+    } else {
+        if (performedMigrations.length){
+            const lastMigrationInstance = performedMigrations.pop()
+            const lastMigrationName = lastMigrationInstance!.name
+            // @ts-ignore
+            migrations[lastMigrationName].down(db)
+            const declinedMigration = await Migration.findOne({name: lastMigrationName})
+            await declinedMigration!.deleteOne()
+            console.log(`Migration ${lastMigrationName} cancel successfully`)
         }
     }
 }
