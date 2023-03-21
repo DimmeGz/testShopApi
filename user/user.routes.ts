@@ -30,17 +30,14 @@ router.get('/:id', async (req, res) => {
 router.post('/',
     async (req: express.Request, res: express.Response) => {
         try {
-            const {name, phone, email, password} = req.body
-
+            const {phone, email} = req.body
             const existingUser = await User.findOne({phone})
             const existingUser2 = await User.findOne({email})
             if (existingUser || existingUser2) {
                 return res.status(400).json({message: 'Such user exists'})
             }
 
-            const hashedPassword = await bcrypt.hash(password, 12)
-
-            const user = new User({name, phone, email, password: hashedPassword})
+            const user = new User(req.body)
             await user.save()
 
             res.status(201).json('User registered')
@@ -55,14 +52,11 @@ router.patch('/:id',
             const params = req.body
             const user = await User.findById(req.params.id)
 
-            if (params.password) {
-                params.password = await bcrypt.hash(params.password, 12)
-            }
-
             if (!user) {
                 res.status(404).json({message: 'User does not exist'})
                 return
             }
+
             Object.assign(user, params)
             await user.save()
             res.status(200).json('User updated')

@@ -1,8 +1,8 @@
 import Joi from "joi"
 import {Request, Response} from "express"
-import {Error} from "mongoose";
-import {User} from "../user/user.schema";
-import {Product} from "../product/product.schema";
+import {Error} from "mongoose"
+import {User} from "../user/user.schema"
+import {Product} from "../product/product.schema"
 
 const phoneJoi = Joi.extend(require('joi-phone-number'))
 const JoiObjectId = require('joi-objectid')(Joi)
@@ -99,14 +99,14 @@ const orderPostJoiSchema = Joi.object(orderSchema)
 const orderPatchJoiSchema = Joi.object(orderSchema)
 
 const authEmailJoiSchema = Joi.object({
-    auth: Joi.string()
+    authField: Joi.string()
         .email({minDomainSegments: 2}),
     password: Joi.string()
         .min(6).required()
 })
 
 const authPhoneJoiSchema = Joi.object({
-    auth: phoneJoi.string()
+    authField: phoneJoi.string()
         .phoneNumber({defaultCountry: 'uk-UA'})
         .messages({'phoneNumber.invalid': 'Required format:+38AAABBBCCDD'}),
     password: Joi.string()

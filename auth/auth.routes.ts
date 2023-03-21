@@ -1,37 +1,38 @@
-import {Router, Request, Response} from 'express'
-import {User} from "../user/user.schema"
-import bcrypt from "bcryptjs"
+import {Router} from 'express'
 import jwt from "jsonwebtoken"
 
+import passport from "../middleware/passport"
 export const router = Router()
 
-router.post('/',async (req: Request, res: Response) => {
-    try {
-        const {auth, password} = req.body
-        const user = await User.findOne({ $or:[ {'email':auth}, {'phone':auth} ]})
+const JWTKey = process.env.JWT_SECRET
 
-        if (!user) {
-            return res.status(400).json({ message: 'User does not exist' })
-        }
+router.post(
+    '/',
+    async (req, res, next) => {
+        passport.authenticate(
+            'login',
+            async (err: any, user: any, info: any) => {
+                try {
+                    if (err || !user) {
+                        return res.status(401).json(info)
+                    }
 
-        const isMatch = await bcrypt.compare(password, user.password)
+                    req.login(
+                        user,
+                        { session: false },
+                        async (error) => {
+                            if (error) return next(error)
 
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Wrong password. Try again.' })
-        }
+                            const body = { _id: user._id, email: user.email }
+                            const token = jwt.sign({ user: body }, JWTKey!)
 
-        const jwtKey = process.env.JWT_SECRET
-        const token = jwt.sign(
-            { userId: user.id },
-            jwtKey!,
-            { expiresIn: '1h' }
-        )
-
-        res
-            .header('Authorization', 'Bearer '+ token)
-            .json({ userId: user.id })
-    } catch (e) {
-        res.status(404).json({message: 'Bad request'})
+                            return res.json({ token })
+                        }
+                    )
+                } catch (error) {
+                    return next(error)
+                }
+            }
+        )(req, res, next)
     }
-})
-
+)
