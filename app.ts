@@ -13,6 +13,7 @@ import {router as authRouter} from './auth/auth.routes'
 
 import {getEnv} from "./utils/env_validation"
 import {dataValidation} from './middleware/validators'
+import passport from "./middleware/passport";
 
 const app = express()
 
@@ -23,7 +24,7 @@ app.use(dataValidation)
 app.use('/api/product', productRouter)
 app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
-app.use('/api/order', orderRouter)
+app.use('/api/order', passport.authenticate('jwt', { session: false }), orderRouter)
 
 async function start() {
     try {
