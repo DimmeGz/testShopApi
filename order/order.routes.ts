@@ -44,12 +44,11 @@ router.get('/:id',
 router.post('/',
     async (req: express.Request, res: express.Response) => {
         try {
-            const activeUser = await User.findById(req.user)
             const {product, qty} = req.body
             let {user} = req.body
             const productInstance = await Product.findById(product)
             // @ts-ignore
-            if (activeUser.role !== 'admin' || !user) {
+            if (req.user.role !== 'admin' || !user) {
                 user = req.user
             }
 
