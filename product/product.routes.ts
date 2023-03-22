@@ -9,14 +9,14 @@ export const router = Router()
 router.get('/', async (req, res) => {
     const {page, elementsCount, skipIndex} = getPaginationParameters(req)
 
-    const total_pages = Math.ceil(await Product.count() / elementsCount)
+    const totalPages = Math.ceil(await Product.count() / elementsCount)
 
     try {
         const data = await Product.find()
             .sort({ _id: 1 })
             .limit(elementsCount)
             .skip(skipIndex)
-        res.json({page, total_pages, elementsCount, data})
+        res.json({page, totalPages, elementsCount, data})
     } catch (e) {
         res.status(500).json({message: 'something went wrong'})
     }

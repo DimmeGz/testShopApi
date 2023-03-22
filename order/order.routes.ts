@@ -22,21 +22,21 @@ router.get('/',
     try {
         const {page, elementsCount, skipIndex} = getPaginationParameters(req)
         if (req.user?.role === 'admin') {
-            const total_pages = Math.ceil(await Order.count() / elementsCount)
+            const totalPages = Math.ceil(await Order.count() / elementsCount)
 
             const data = await Order.find()
                 .sort({ _id: 1 })
                 .limit(elementsCount)
                 .skip(skipIndex)
-            res.json({page, total_pages, elementsCount, data})
+            res.json({page, totalPages, elementsCount, data})
         } else {
-            const total_pages = Math.ceil(await Order.find({user: req.user}).count() / elementsCount)
+            const totalPages = Math.ceil(await Order.find({user: req.user}).count() / elementsCount)
 
             const data = await Order.find({user: req.user})
                 .sort({ _id: 1 })
                 .limit(elementsCount)
                 .skip(skipIndex)
-            res.json({page, total_pages, elementsCount, data})
+            res.json({page, totalPages, elementsCount, data})
         }
     } catch (e) {
         res.status(404).json('Bad request')
