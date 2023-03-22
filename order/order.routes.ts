@@ -78,7 +78,7 @@ router.patch('/:id',
                 res.status(404).json({message: 'Order does not exist'})
                 return
             }
-            if (!_.isEqual(order.user, req.user?._id) || req.user?.role !== 'admin') {
+            if (!_.isEqual(order.user, req.user?._id) && req.user?.role !== 'admin') {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
                 return
             }

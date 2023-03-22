@@ -1,7 +1,7 @@
 import express, {Router} from 'express'
-import bcrypt from 'bcryptjs'
 
 import {User} from './user.schema'
+import jwt from "jsonwebtoken"
 
 export const router = Router()
 
@@ -30,18 +30,24 @@ router.get('/:id', async (req, res) => {
 router.post('/',
     async (req: express.Request, res: express.Response) => {
         try {
-            const {phone, email} = req.body
+            const {name, phone, email, password} = req.body
             const existingUser = await User.findOne({phone})
             const existingUser2 = await User.findOne({email})
-            if (existingUser || existingUser2) {
+            const existingUser3 = await User.findOne({name})
+            if (existingUser || existingUser2 || existingUser3) {
                 return res.status(400).json({message: 'Such user exists'})
             }
 
-            const user = new User(req.body)
+            const user = new User({name, phone, email, password, role: 'user'})
             await user.save()
 
-            res.status(201).json('User registered')
+            const JWTKey = process.env.JWT_SECRET
+            const body = { _id: user._id, email: user.email }
+            const token = jwt.sign({ user: body }, JWTKey!)
+
+            return res.status(200).json({ token })
         } catch (e) {
+            console.log(e)
             res.status(400).json({message: 'Incorrect data'})
         }
     })
