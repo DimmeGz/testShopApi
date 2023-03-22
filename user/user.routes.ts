@@ -23,7 +23,7 @@ router.get('/', passport.authenticate('jwt', { session: false }),
 router.get('/:id', passport.authenticate('jwt', { session: false }),
     async (req, res) => {
     try {
-        if (req.user?.role === 'admin' || JSON.stringify(req.params.id) !== JSON.stringify(req.user?._id)) {
+        if (req.user?.role === 'admin' || JSON.stringify(req.params.id) === JSON.stringify(req.user?._id)) {
             const user = await User.findById(req.params.id)
             if (!user) {
                 res.status(404).json({message: 'User does not exist'})
@@ -66,7 +66,7 @@ router.post('/',
 router.patch('/:id', passport.authenticate('jwt', { session: false }),
     async (req: express.Request, res: express.Response) => {
         try {
-            if (req.user?.role === 'admin' || JSON.stringify(req.params.id) !== JSON.stringify(req.user?._id)) {
+            if (req.user?.role === 'admin' || JSON.stringify(req.params.id) === JSON.stringify(req.user?._id)) {
                 const params = req.body
                 const user = await User.findById(req.params.id)
 
@@ -74,7 +74,9 @@ router.patch('/:id', passport.authenticate('jwt', { session: false }),
                     res.status(404).json({message: 'User does not exist'})
                     return
                 }
-
+                if (req.user?.role !== 'admin'){
+                    params.role = 'user'
+                }
                 Object.assign(user, params)
                 await user.save()
                 res.status(200).json('User updated')

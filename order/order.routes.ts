@@ -2,8 +2,7 @@ import {Request, Response, Router} from 'express'
 import {Order} from './order.schema'
 import {Product} from '../product/product.schema'
 import _ from "lodash"
-import passport from "../middleware/passport"
-import {User} from "../user/user.schema";
+import {getPaginationParameters} from "../utils/functions"
 
 export const router = Router()
 
@@ -21,12 +20,23 @@ async function getOrder (req: Request, res: Response) {
 router.get('/',
     async (req: Request, res: Response) => {
     try {
+        const {page, elementsCount, skipIndex} = getPaginationParameters(req)
         if (req.user?.role === 'admin') {
-            const orders = await Order.find()
-            res.json(orders)
+            const totalPages = Math.ceil(await Order.count() / elementsCount)
+
+            const data = await Order.find()
+                .sort({ _id: 1 })
+                .limit(elementsCount)
+                .skip(skipIndex)
+            res.json({page, totalPages, elementsCount, data})
         } else {
-            const orders = await Order.find({user: req.user})
-            res.json(orders)
+            const totalPages = Math.ceil(await Order.find({user: req.user}).count() / elementsCount)
+
+            const data = await Order.find({user: req.user})
+                .sort({ _id: 1 })
+                .limit(elementsCount)
+                .skip(skipIndex)
+            res.json({page, totalPages, elementsCount, data})
         }
     } catch (e) {
         res.status(404).json('Bad request')
