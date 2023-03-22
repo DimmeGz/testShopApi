@@ -1,3 +1,4 @@
-import pruductUpdateField from './pruductUpdateField'
+import productUpdateField from './productUpdateField'
+import userAddRole from "./userAddRole";
 
-export default {"pruductUpdateField": pruductUpdateField}
+export default {"productUpdateField": productUpdateField, "userAddRole": userAddRole}

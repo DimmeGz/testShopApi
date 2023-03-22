@@ -7,7 +7,8 @@ const joiSchema = Joi.object({
     MONGO_URL: Joi.string().required(),
     PORT: Joi.string().required(),
     MIGRATE: Joi.string().optional().allow(''),
-    MIGRATION_TYPE: Joi.string().default('up').required()
+    MIGRATION_TYPE: Joi.string().default('up').required(),
+    JWT_SECRET: Joi.string().required(),
 })
 
 async function getFile () {
@@ -17,7 +18,7 @@ async function getFile () {
             const lines = data.split('\n')
             for (let line of lines) {
                 const element = line.split(/=(.*)/s)
-                envValues[element[0]] = element[1]
+                envValues[element[0]] = element[1].replace('\r', '')
             }
         })
         return envValues

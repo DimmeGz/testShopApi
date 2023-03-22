@@ -1,8 +1,8 @@
 import Joi from "joi"
 import {Request, Response} from "express"
-import {Error} from "mongoose";
-import {User} from "../user/user.schema";
-import {Product} from "../product/product.schema";
+import {Error} from "mongoose"
+import {User} from "../user/user.schema"
+import {Product} from "../product/product.schema"
 
 const phoneJoi = Joi.extend(require('joi-phone-number'))
 const JoiObjectId = require('joi-objectid')(Joi)
@@ -84,19 +84,48 @@ const existingProduct = async (value: string) => {
     }
 }
 
-const orderSchema = {
+const orderPostJoiSchema = Joi.object({
     user: JoiObjectId()
-        .external(existingUser),
+        .external(existingUser)
+        .optional(),
     product: JoiObjectId()
-        .external(existingProduct),
+        .external(existingProduct)
+        .required(),
     qty: Joi.number()
         .integer()
         .min(1)
-}
+        .required()
+})
 
-const orderPostJoiSchema = Joi.object(orderSchema)
-    .fork(Object.keys(orderSchema), (schema) => schema.required())
-const orderPatchJoiSchema = Joi.object(orderSchema)
+const orderPatchJoiSchema = Joi.object({
+    user: JoiObjectId()
+        .external(existingUser)
+        .optional(),
+    product: JoiObjectId()
+        .external(existingProduct)
+        .optional(),
+    qty: Joi.number()
+        .integer()
+        .min(1)
+        .optional()
+})
+
+const authEmailJoiSchema = Joi.object({
+    authField: Joi.string()
+        .email({minDomainSegments: 2}),
+    password: Joi.string()
+        .min(6).required()
+})
+
+const authPhoneJoiSchema = Joi.object({
+    authField: phoneJoi.string()
+        .phoneNumber({defaultCountry: 'uk-UA'})
+        .messages({'phoneNumber.invalid': 'Required format:+38AAABBBCCDD'}),
+    password: Joi.string()
+        .min(6).required()
+})
+
+const authJoiSchema = Joi.alternatives(authEmailJoiSchema , authPhoneJoiSchema)
 
 const schema: Record<string, any> = {
     user: {
@@ -110,6 +139,9 @@ const schema: Record<string, any> = {
     order: {
         POST: orderPostJoiSchema,
         PATCH: orderPatchJoiSchema
+    },
+    auth: {
+        POST: authJoiSchema,
     }
 }
 
