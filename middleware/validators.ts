@@ -22,7 +22,7 @@ const userSchema = {
 
 const userPostJoiSchema = Joi.object(userSchema)
     .fork(Object.keys(userSchema), (schema) => schema.required())
-const userPatchJoiSchema = Joi.object(userSchema)
+const userPatchJoiSchema = Joi.object(userSchema).keys({role: Joi.string().valid('user','admin')})
 
 const productPostJoiSchema = Joi.object({
     name: Joi.string()
