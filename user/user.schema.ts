@@ -2,6 +2,7 @@ import {Model, Schema, model} from 'mongoose'
 import bcrypt from "bcryptjs"
 
 interface IUser {
+    _id: string
     name: string
     password: string
     phone: string
@@ -9,7 +10,12 @@ interface IUser {
     role: string
 }
 
-// Put all user instance methods in this interface:
+declare global {
+    namespace Express {
+        interface User extends IUser {}
+    }
+}
+
 interface IUserMethods {
     isValidPassword(password: string): boolean
 }
