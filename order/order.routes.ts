@@ -49,7 +49,7 @@ router.post('/',
             let {user} = req.body
             const productInstance = await Product.findById(product)
             // @ts-ignore
-            if (activeUser.role !== 'admin') {
+            if (activeUser.role !== 'admin' || !user) {
                 user = req.user
             }
 

@@ -84,19 +84,31 @@ const existingProduct = async (value: string) => {
     }
 }
 
-const orderSchema = {
+const orderPostJoiSchema = Joi.object({
     user: JoiObjectId()
-        .external(existingUser),
+        .external(existingUser)
+        .optional(),
     product: JoiObjectId()
-        .external(existingProduct),
+        .external(existingProduct)
+        .required(),
     qty: Joi.number()
         .integer()
         .min(1)
-}
+        .required()
+})
 
-const orderPostJoiSchema = Joi.object(orderSchema)
-    .fork(Object.keys(orderSchema), (schema) => schema.required())
-const orderPatchJoiSchema = Joi.object(orderSchema)
+const orderPatchJoiSchema = Joi.object({
+    user: JoiObjectId()
+        .external(existingUser)
+        .optional(),
+    product: JoiObjectId()
+        .external(existingProduct)
+        .optional(),
+    qty: Joi.number()
+        .integer()
+        .min(1)
+        .optional()
+})
 
 const authEmailJoiSchema = Joi.object({
     authField: Joi.string()
