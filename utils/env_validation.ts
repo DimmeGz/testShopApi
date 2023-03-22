@@ -9,6 +9,7 @@ const joiSchema = Joi.object({
     MIGRATE: Joi.string().optional().allow(''),
     MIGRATION_TYPE: Joi.string().default('up').required(),
     JWT_SECRET: Joi.string().required(),
+    PSQL_URL: Joi.string().required(),
 })
 
 async function getFile () {

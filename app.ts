@@ -5,6 +5,7 @@ import express from 'express'
 import mongoose, {ConnectOptions} from 'mongoose'
 import {migrate} from './db/migrate'
 import bodyParser from 'body-parser'
+import {connectDB} from './utils/postgresqlConnect'
 
 import {router as productRouter} from './product/product.routes'
 import {router as userRouter} from './user/user.routes'
@@ -13,7 +14,7 @@ import {router as authRouter} from './auth/auth.routes'
 
 import {getEnv} from "./utils/env_validation"
 import {dataValidation} from './middleware/validators'
-import passport from "./middleware/passport";
+import passport from "./middleware/passport"
 
 const app = express()
 
@@ -39,6 +40,9 @@ async function start() {
             await migrate(envValues.MONGO_URL, envValues.MIGRATION_TYPE)
         }
         const PORT: number = Number(envValues.PORT) || 5000
+
+        await connectDB()
+
         app.listen(PORT, () => {
             console.log(`Server has been started on port ${PORT}...`)
         })
