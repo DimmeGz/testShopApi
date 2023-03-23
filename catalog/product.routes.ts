@@ -1,13 +1,12 @@
 import express, {Router} from 'express'
+import passport from "../middleware/passport"
 
 import {Product} from './product.model'
-import passport from "../middleware/passport";
 import {getPaginationParameters} from "../utils/functions"
 
 export const router = Router()
 
 router.get('/', async (req, res) => {
-    await Product.sync({ force: false })
     const {page, elementsCount, skipIndex} = getPaginationParameters(req)
 
     const totalPages = Math.ceil(await Product.count() / elementsCount)

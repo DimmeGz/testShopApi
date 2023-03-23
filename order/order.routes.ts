@@ -1,5 +1,5 @@
 import {Request, Response, Router} from 'express'
-import {Order} from './order.models'
+import {Order, OrderRow} from './order.models'
 import {Product} from '../catalog/product.model'
 import _ from "lodash"
 import {getPaginationParameters} from "../utils/functions"
@@ -19,8 +19,6 @@ async function getOrder (req: Request, res: Response) {
 
 router.get('/',
     async (req: Request, res: Response) => {
-        // await Order.sync({ force: false })
-        // await Product.sync({ force: false })
     try {
         const {page, elementsCount, skipIndex} = getPaginationParameters(req)
         if (req.user?.role === 'admin') {
@@ -43,7 +41,8 @@ router.get('/:id',
     async (req, res) => {
     try {
         const order = await getOrder(req, res)
-        res.status(200).json(order)
+        const rows = await OrderRow.findAll({where: {OrderId: order.id}})
+        res.status(200).json({order, rows})
     } catch (e: any) {
         res.status(404).json(e.message)
     }
@@ -52,22 +51,23 @@ router.get('/:id',
 router.post('/',
     async (req: Request, res: Response) => {
         try {
-            const {product, qty} = req.body
+            const {status, rows} = req.body
             let {user} = req.body
-            const productInstance = await Product.findByPk(product)
             if (req.user?.role !== 'admin' || !user) {
                 user = req.user?.id
             }
 
-            if (productInstance?.price) {
-                const sum = productInstance.price * qty
-
-                await Order.create({ProductId: product, UserId: user, qty, sum})
-
-                res.status(201).json('Order added')
-            } else {
-                res.status(404).json({message: 'Product does not exist'})
+            let sum = 0
+            const order = await Order.create({UserId: user, status, sum})
+            for (let row of rows) {
+                await OrderRow.create({OrderId: order.id, ProductId: row.product, qty: row.qty})
+                const product = await Product.findByPk(row.product)
+                sum += row.qty * product!.price
             }
+            order.sum = sum
+            order.save()
+
+            res.status(201).json(`Order №${order.id} added`)
         } catch (e) {
             res.status(404).json('Bad request')
         }
@@ -76,7 +76,8 @@ router.post('/',
 router.patch('/:id',
     async (req: Request, res: Response) => {
         try {
-            const params = req.body
+            const {status, rows} = req.body
+            let {user} = req.body
             const order = await Order.findByPk(req.params.id)
 
             if (!order) {
@@ -87,35 +88,34 @@ router.patch('/:id',
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
                 return
             }
-            if (params.product || params.qty) {
-                let productInstance, qty
-                if (params.product) {
-                    productInstance = await Product.findByPk(params.product)
-                } else {
-                    productInstance = await Product.findByPk(order.ProductId)
+            let sum = order.sum
+            if (rows) {
+                // Delete existing orderRows from DB and set sum = 0
+                sum = 0
+                const oldRows = await OrderRow.findAll({where: {OrderId: order.id}})
+                for (let oldRow of oldRows) {
+                    await oldRow.destroy()
                 }
-                if (params.qty) {
-                    qty = params.qty
-                } else {
-                    qty = order.qty
+
+                // create new orderRows in DB
+                for (let row of rows) {
+                    await OrderRow.create({OrderId: order.id, ProductId: row.product, qty: row.qty})
+                    const product = await Product.findByPk(row.product)
+                    sum += row.qty * product!.price
                 }
-                if (!productInstance || !productInstance.price) {
-                    res.status(404).json({message: 'Product in order does not exist'})
-                    return
-                }
-                params.sum = productInstance.price * qty
             }
-            if (params.user) {
-                if (params.user !== req.user?.id) {
-                    params.user = req.user?.id
+            if (user) {
+                if (user !== req.user?.id && req.user?.role !== 'admin') {
+                    user = req.user?.id
                 }
             }
 
-            await order.set({ProductId: params.product, UserId: params.user, qty: params.qty, sum: params.sum})
+            await order.set({UserId: user, status: status, sum: sum})
             await order.save()
 
-            res.status(200).json('Order updated')
-        } catch (e) {
+            res.status(200).json(`Order №${order.id} updated`)
+        } catch (e: any) {
+            console.log(e.message)
             res.status(404).json({message: 'Bad request'})
         }
     })
@@ -123,9 +123,15 @@ router.patch('/:id',
 router.delete('/:id', async (req, res) => {
     try {
         const order = await getOrder(req, res)
+
+        const rows = await OrderRow.findAll({where: {OrderId: order.id}})
+        for (let row of rows) {
+            await row.destroy()
+        }
+
         await order.destroy()
 
-        res.status(200).json('Order deleted')
+        res.status(200).json(`Order №${order.id} deleted`)
     } catch (e: any) {
         res.status(404).json({message: e.message})
     }
