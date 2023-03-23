@@ -7,16 +7,15 @@ import {getPaginationParameters} from "../utils/functions"
 export const router = Router()
 
 router.get('/', async (req, res) => {
-    // await Product.sync({ force: false })
-    // const {page, elementsCount, skipIndex} = getPaginationParameters(req)
+    await Product.sync({ force: false })
+    const {page, elementsCount, skipIndex} = getPaginationParameters(req)
 
-    // const totalPages = Math.ceil(await Product.count() / elementsCount)
+    const totalPages = Math.ceil(await Product.count() / elementsCount)
     const data1 = await Product.findAll()
-    console.log(data1)
 
     try {
-        // const data = await Product.findAll({order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})
-        // res.json({page, totalPages, elementsCount, data})
+        const data = await Product.findAll({order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})
+        res.json({page, totalPages, elementsCount, data})
     } catch (e) {
         res.status(500).json({message: 'something went wrong'})
     }
