@@ -23,5 +23,5 @@ export const Category = sequelize.define<CategoryModel>('Category', {
     }
 })
 
-Category.hasMany(Product)
+Category.hasMany(Product, { onDelete: 'protect' })
 Product.belongsTo(Category)

@@ -11,7 +11,6 @@ router.get('/', async (req, res) => {
     const {page, elementsCount, skipIndex} = getPaginationParameters(req)
 
     const totalPages = Math.ceil(await Product.count() / elementsCount)
-    const data1 = await Product.findAll()
 
     try {
         const data = await Product.findAll({order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})

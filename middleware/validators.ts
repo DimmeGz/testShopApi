@@ -36,7 +36,9 @@ const productPostJoiSchema = Joi.object({
     description: Joi.string()
         .optional(),
     image: Joi.string()
-        .optional()
+        .optional(),
+    CategoryId: Joi.number()
+        .optional(),
 })
 
 const productPatchJoiSchema = Joi.object({
@@ -52,7 +54,9 @@ const productPatchJoiSchema = Joi.object({
     description: Joi.string()
         .optional(),
     image: Joi.string()
-        .optional()
+        .optional(),
+    CategoryId: Joi.number()
+        .optional(),
 })
 
 const existingUser = async (value: string) => {
