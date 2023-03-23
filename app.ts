@@ -5,7 +5,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import {connectDB} from './utils/postgresqlConnect'
 
-import {router as productRouter} from './product/product.routes'
+import {router as productRouter} from './catalog/product.routes'
 import {router as userRouter} from './user/user.routes'
 import {router as orderRouter} from './order/order.routes'
 import {router as authRouter} from './auth/auth.routes'

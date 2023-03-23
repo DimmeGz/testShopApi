@@ -1,6 +1,6 @@
 import {Request, Response, Router} from 'express'
 import {Order} from './order.models'
-import {Product} from '../product/product.model'
+import {Product} from '../catalog/product.model'
 import _ from "lodash"
 import {getPaginationParameters} from "../utils/functions"
 

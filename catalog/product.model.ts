@@ -41,28 +41,3 @@ export const Product = sequelize.define<ProductModel>('Product', {
         type: DataTypes.SMALLINT
     }
 })
-
-
-interface CategoryModel extends Model<InferAttributes<CategoryModel>, InferCreationAttributes<CategoryModel>> {
-    id: CreationOptional<number>
-    name: string;
-    description: string
-
-}
-
-export const Category = sequelize.define<CategoryModel>('Category', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
-    },
-    name: {
-        type: DataTypes.STRING,
-    },
-    description: {
-        type: DataTypes.STRING,
-    }
-})
-
-Category.hasMany(Product)
-Product.belongsTo(Category)

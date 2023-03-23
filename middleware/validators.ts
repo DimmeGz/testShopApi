@@ -2,7 +2,7 @@ import Joi from "joi"
 import {Request, Response} from "express"
 import {Error} from "mongoose"
 import {User} from "../user/user.model"
-import {Product} from "../product/product.model"
+import {Product} from "../catalog/product.model"
 
 const phoneJoi = Joi.extend(require('joi-phone-number'))
 
