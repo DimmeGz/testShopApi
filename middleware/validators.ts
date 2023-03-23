@@ -1,11 +1,10 @@
 import Joi from "joi"
 import {Request, Response} from "express"
 import {Error} from "mongoose"
-import {User} from "../user/user.schema"
-import {Product} from "../product/product.schema"
+import {User} from "../user/user.model"
+import {Product} from "../product/product.model"
 
 const phoneJoi = Joi.extend(require('joi-phone-number'))
-const JoiObjectId = require('joi-objectid')(Joi)
 
 const userSchema = {
     name: Joi.string()
@@ -59,7 +58,7 @@ const productPatchJoiSchema = Joi.object({
 const existingUser = async (value: string) => {
     if (value) {
         try {
-            const user = await User.findById(value)
+            const user = await User.findByPk(value)
             if (!user) {
                 throw new Error('Record does not exist')
             }
@@ -73,7 +72,7 @@ const existingUser = async (value: string) => {
 const existingProduct = async (value: string) => {
     if (value) {
         try {
-            const user = await Product.findById(value)
+            const user = await Product.findByPk(value)
             if (!user) {
                 throw new Error('Record does not exist')
             }
@@ -85,10 +84,10 @@ const existingProduct = async (value: string) => {
 }
 
 const orderPostJoiSchema = Joi.object({
-    user: JoiObjectId()
+    user: Joi.number()
         .external(existingUser)
         .optional(),
-    product: JoiObjectId()
+    product: Joi.number()
         .external(existingProduct)
         .required(),
     qty: Joi.number()
@@ -98,10 +97,10 @@ const orderPostJoiSchema = Joi.object({
 })
 
 const orderPatchJoiSchema = Joi.object({
-    user: JoiObjectId()
+    user: Joi.number()
         .external(existingUser)
         .optional(),
-    product: JoiObjectId()
+    product: Joi.number()
         .external(existingProduct)
         .optional(),
     qty: Joi.number()

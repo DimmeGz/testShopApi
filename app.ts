@@ -2,8 +2,6 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 import express from 'express'
-import mongoose, {ConnectOptions} from 'mongoose'
-import {migrate} from './db/migrate'
 import bodyParser from 'body-parser'
 import {connectDB} from './utils/postgresqlConnect'
 
@@ -31,14 +29,6 @@ async function start() {
     try {
         const envValues = await getEnv()
 
-        await mongoose.connect(envValues.MONGO_URL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        } as ConnectOptions)
-
-        if (!!envValues.MIGRATE && envValues.MIGRATION_TYPE) {
-            await migrate(envValues.MONGO_URL, envValues.MIGRATION_TYPE)
-        }
         const PORT: number = Number(envValues.PORT) || 5000
 
         await connectDB()

@@ -1,9 +1,12 @@
 const passport = require('passport')
 const localStrategy = require('passport-local').Strategy
-import {User} from "../user/user.schema"
-
+import bcrypt from 'bcryptjs'
 const JWTstrategy = require('passport-jwt').Strategy
+
 const ExtractJWT = require('passport-jwt').ExtractJwt
+const { Op } = require("sequelize")
+
+import {User} from "../user/user.model"
 
 const JWTKey = process.env.JWT_SECRET
 
@@ -16,13 +19,13 @@ passport.use(
         },
         async (authField: string, password: string, done: any) => {
             try {
-                const user = await User.findOne({ $or:[ {'email':authField}, {'phone':authField} ]})
+                const user = await User.findOne({ where: { [Op.or]: [{ email: authField }, { phone: authField }]}})
 
                 if (!user) {
                     return done(null, false, { message: 'User not found' })
                 }
 
-                const validate = await user.isValidPassword(password)
+                const validate = await bcrypt.compare(password, user.dataValues.password)
 
                 if (!validate) {
                     return done(null, false, { message: 'Wrong Password' })
@@ -40,12 +43,12 @@ passport.use(
     new JWTstrategy(
         {
             secretOrKey: JWTKey,
-            jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()        // se
+            jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
         },
         async (token: any, done: any) => {
             try {
-                const activeUser = await User.findById(token.user)
-                return done(null, activeUser);
+                const activeUser = await User.findOne({ where: { email: token.user[Object.keys(token.user)[0]] }})
+                return done(null, activeUser)
             } catch (error) {
                 done(error)
             }
