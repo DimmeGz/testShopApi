@@ -2,7 +2,9 @@ import express, {Router} from 'express'
 import passport from "../middleware/passport"
 
 import {Product} from './product.model'
+import {OrderRow} from '../order/order.models'
 import {getPaginationParameters} from "../utils/functions"
+import {checkUser} from '../middleware/checkUser'
 
 export const router = Router()
 
@@ -19,14 +21,22 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkUser,
+    async (req, res) => {
     try {
         const product = await Product.findByPk(req.params.id)
         if (!product) {
             res.status(404).json({message: 'Product does not exist'})
             return
         }
-        res.status(200).json(product)
+
+        if (req.userRole !== 'admin') {
+            res.status(200).json(product)
+        } else {
+            const orderRows = await OrderRow.findAll({where: {ProductId: product.id}})
+            const totalSales = orderRows.reduce(function (acc, obj) { return acc + obj.qty; }, 0)
+            res.status(200).json({product, totalSales})
+        }
     } catch (e) {
         res.status(404).json(e)
     }
