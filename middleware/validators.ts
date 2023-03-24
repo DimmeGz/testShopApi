@@ -145,7 +145,7 @@ export async function dataValidation(req: Request, res: Response, next: any) {
             await schema[targetApi][req.method].validateAsync(req.body)
             next()
         } catch (e: any) {
-            res.status(404).json({message: e.message})
+            res.status(400).json({message: e.message})
         }
     }
 }
