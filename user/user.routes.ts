@@ -15,7 +15,7 @@ router.get('/', passport.authenticate('jwt', { session: false }),
             const users = await User.findAll()
             res.json(users)
         } else {
-            res.status(403).json({message: 'You don\'t have permission to access this resource'})
+            res.status(403).json({message: 'Forbidden'})
         }
     } catch (e) {
         res.status(500).json({message: 'something went wrong'})
@@ -33,7 +33,7 @@ router.get('/:id', passport.authenticate('jwt', { session: false }),
             }
             res.status(200).json(user)
         } else {
-            res.status(403)
+            res.status(403).json('Forbidden')
         }
     } catch (e) {
         res.status(404).json(e)
@@ -84,7 +84,7 @@ router.patch('/:id', passport.authenticate('jwt', { session: false }),
                 await user.save()
                 res.status(200).json(user)
             } else {
-                res.status(403)
+                res.status(403).json('Forbidden')
             }
         } catch (e) {
             res.status(404).json({message: 'Bad request'})
@@ -103,7 +103,7 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }),
             await user.destroy()
             res.status(200).json({ deleted: user.id })
         } else {
-            res.status(403).json({message: 'You don\'t have permission to access this resource'})
+            res.status(403).json({message: 'Forbidden'})
         }
     } catch (e) {
         res.status(404).json({message: 'Bad request'})
