@@ -57,7 +57,7 @@ router.post('/',
             const body = { _id: user.id, email: user.email }
             const token = jwt.sign({ user: body }, JWTKey!)
 
-            return res.status(200).json({ token })
+            return res.status(200).json({ user, token })
         } catch (e) {
             console.log(e)
             res.status(400).json({message: 'Incorrect data'})
@@ -82,7 +82,7 @@ router.patch('/:id', passport.authenticate('jwt', { session: false }),
                 }
                 user.set(req.body)
                 await user.save()
-                res.status(200).json('User updated')
+                res.status(200).json(user)
             } else {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
             }
@@ -101,7 +101,7 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }),
                 return
             }
             await user.destroy()
-            res.status(200).json('User deleted')
+            res.status(200).json({ deleted: user.id })
         } else {
             res.status(403).json({message: 'You don\'t have permission to access this resource'})
         }

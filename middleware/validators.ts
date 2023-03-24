@@ -88,11 +88,11 @@ const existingProduct = async (value: string) => {
 }
 
 const orderSchema = {
-    user: Joi.number().external(existingUser).optional(),
+    UserId: Joi.number().external(existingUser).optional(),
     status: Joi.string(),
     rows: Joi.array().items(Joi.object({
-            product: Joi.number().external(existingProduct).required(),
-            qty: Joi.number().required()
+        ProductId: Joi.number().external(existingProduct).required(),
+        qty: Joi.number().required()
     }))
 }
 

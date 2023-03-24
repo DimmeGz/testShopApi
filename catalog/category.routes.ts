@@ -9,7 +9,7 @@ router.get('/',
     async (req, res) => {
         try {
             const categories = await Category.findAll()
-            res.json(categories)
+            res.status(200).json(categories)
         } catch (e) {
             res.status(500).json({message: 'something went wrong'})
         }
@@ -40,9 +40,9 @@ router.post('/', passport.authenticate('jwt', {session: false}),
                     return res.status(400).json({message: 'Such category exists'})
                 }
 
-                await Category.create(req.body)
+                const category = await Category.create(req.body)
 
-                res.status(201).json('Category added')
+                res.status(201).json(category)
             } else {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
             }
@@ -65,7 +65,7 @@ router.patch('/:id',
                 }
                 category.set(req.body)
                 await category.save()
-                res.status(200).json('Category updated')
+                res.status(200).json(category)
             } else {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
             }
@@ -88,7 +88,7 @@ router.delete('/:id',
                     return res.status(409).json({message: 'Category can\'t be deleted: products exist'})
                 }
                 category?.destroy()
-                res.status(200).json('Category deleted')
+                res.status(200).json({ deleted: category.id })
             } else {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
             }

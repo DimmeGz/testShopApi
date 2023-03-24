@@ -1,7 +1,22 @@
-import {DataTypes} from 'sequelize'
+import {CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model} from 'sequelize'
 import {sequelize} from '../utils/postgresqlConnect'
 
-export const User = sequelize.define('User', {
+interface UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> {
+    id: CreationOptional<number>
+    name: string
+    password: string
+    phone: string
+    email: string
+    role: string
+
+}
+
+export const User = sequelize.define<UserModel>('User', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
     name: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -28,7 +43,7 @@ export const User = sequelize.define('User', {
 })
 
 interface IUser {
-    id: string
+    id: number
     name: string
     password: string
     phone: string

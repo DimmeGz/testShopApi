@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 
     try {
         const data = await Product.findAll({order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})
-        res.json({page, totalPages, elementsCount, data})
+        res.status(200).json({page, totalPages, elementsCount, data})
     } catch (e) {
         res.status(500).json({message: 'something went wrong'})
     }
@@ -51,9 +51,9 @@ router.post('/', passport.authenticate('jwt', { session: false }),
                     return res.status(400).json({message: 'Such product exists'})
                 }
 
-                await Product.create(req.body)
+                const product = await Product.create(req.body)
 
-                res.status(201).json('Product added')
+                res.status(201).json(product)
             } else {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
             }
@@ -74,7 +74,7 @@ router.patch('/:id', passport.authenticate('jwt', { session: false }),
                 }
                 product.set(req.body)
                 await product.save()
-                res.status(200).json('Product updated')
+                res.status(200).json(product)
             } else {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
             }
@@ -93,7 +93,7 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }),
                 return
             }
             await product.destroy()
-            res.status(200).json('Product deleted')
+            res.status(200).json({ deleted: product.id })
         } else {
             res.status(403).json({message: 'You don\'t have permission to access this resource'})
         }

@@ -25,12 +25,12 @@ router.get('/',
             const totalPages = Math.ceil(await Order.count() / elementsCount)
 
             const data = await Order.findAll({order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})
-            res.json({page, totalPages, elementsCount, data})
+            res.status(200).json({page, totalPages, elementsCount, data})
         } else {
             const totalPages = await Order.findAndCountAll({where: {UserId: req.user?.id}})
 
             const data = await Order.findAll({where: {UserId: req.user?.id}, order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})
-            res.json({page, totalPages: totalPages.count, elementsCount, data})
+            res.status(200).json({page, totalPages: totalPages.count, elementsCount, data})
         }
     } catch (e) {
         res.status(404).json('Bad request')
@@ -52,22 +52,24 @@ router.post('/',
     async (req: Request, res: Response) => {
         try {
             const {status, rows} = req.body
-            let {user} = req.body
-            if (req.user?.role !== 'admin' || !user) {
-                user = req.user?.id
+            let {UserId} = req.body
+            if (req.user?.role !== 'admin' || !UserId) {
+                UserId = req.user?.id
             }
+            const resRows = []
 
             let sum = 0
-            const order = await Order.create({UserId: user, status, sum})
+            const order = await Order.create({UserId, status, sum})
             for (let row of rows) {
-                await OrderRow.create({OrderId: order.id, ProductId: row.product, qty: row.qty})
-                const product = await Product.findByPk(row.product)
+                const newRow = await OrderRow.create({OrderId: order.id, ProductId: row.ProductId, qty: row.qty})
+                resRows.push(newRow)
+                const product = await Product.findByPk(row.ProductId)
                 sum += row.qty * product!.price
             }
             order.sum = sum
             order.save()
 
-            res.status(201).json(`Order №${order.id} added`)
+            res.status(201).json({order, rows: resRows})
         } catch (e) {
             res.status(404).json('Bad request')
         }
@@ -77,7 +79,7 @@ router.patch('/:id',
     async (req: Request, res: Response) => {
         try {
             const {status, rows} = req.body
-            let {user} = req.body
+            let {UserId} = req.body
             const order = await Order.findByPk(req.params.id)
 
             if (!order) {
@@ -89,31 +91,34 @@ router.patch('/:id',
                 return
             }
             let sum = order.sum
+
+            let resRows = await OrderRow.findAll({where: {OrderId: order.id}})
             if (rows) {
                 // Delete existing orderRows from DB and set sum = 0
                 sum = 0
-                const oldRows = await OrderRow.findAll({where: {OrderId: order.id}})
-                for (let oldRow of oldRows) {
+                for (let oldRow of resRows) {
                     await oldRow.destroy()
                 }
+                resRows = []
 
                 // create new orderRows in DB
                 for (let row of rows) {
-                    await OrderRow.create({OrderId: order.id, ProductId: row.product, qty: row.qty})
-                    const product = await Product.findByPk(row.product)
+                    const newRow = await OrderRow.create({OrderId: order.id, ProductId: row.ProductId, qty: row.qty})
+                    resRows.push(newRow)
+                    const product = await Product.findByPk(row.ProductId)
                     sum += row.qty * product!.price
                 }
             }
-            if (user) {
-                if (user !== req.user?.id && req.user?.role !== 'admin') {
-                    user = req.user?.id
+            if (UserId) {
+                if (UserId !== req.user?.id && req.user?.role !== 'admin') {
+                    UserId = req.user?.id
                 }
             }
 
-            await order.set({UserId: user, status: status, sum: sum})
+            await order.set({UserId, status, sum})
             await order.save()
 
-            res.status(200).json(`Order №${order.id} updated`)
+            res.status(200).json({order, rows: resRows})
         } catch (e: any) {
             console.log(e.message)
             res.status(404).json({message: 'Bad request'})
@@ -131,7 +136,7 @@ router.delete('/:id', async (req, res) => {
 
         await order.destroy()
 
-        res.status(200).json(`Order №${order.id} deleted`)
+        res.status(200).json({ deleted: order.id })
     } catch (e: any) {
         res.status(404).json({message: e.message})
     }
