@@ -51,20 +51,20 @@ describe('for unauthorized', () => {
 })
 
 describe('for admin', () => {
-    let admin: any
-    let adminToken: any
+    let admin1: any
+    let adminToken1: any
     beforeAll(async () => {
-        admin = await User.create(adminUser)
+        admin1 = await User.create(adminUser)
         const JWTKey = process.env.JWT_SECRET
-        const body = { email: admin.email }
-        adminToken = jwt.sign({ user: body }, JWTKey!)
+        const body = { email: admin1.email }
+        adminToken1 = jwt.sign({ user: body }, JWTKey!)
     })
 
     it('admin test ', async () => {
         const response = await request(app)
             .post("/api/product/")
             .send(productPostBody)
-            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Authorization', `Bearer ${adminToken1}`)
         expect(response.statusCode).toBe(201)
         expect(response.body.name).toBe(productPostBody.name)
         const productId = response.body.id
@@ -72,7 +72,7 @@ describe('for admin', () => {
         const response1 = await request(app)
             .post("/api/product/")
             .send(productPostBody)
-            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Authorization', `Bearer ${adminToken1}`)
         expect(response1.statusCode).toBe(400)
 
         const response2 = await request(app)
@@ -82,7 +82,7 @@ describe('for admin', () => {
 
         const response2Admin = await request(app)
             .get("/api/product/" + productId)
-            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Authorization', `Bearer ${adminToken1}`)
         expect(response2Admin.statusCode).toBe(200)
         expect(response2Admin.body.totalSales).toBe(0)
 
@@ -93,36 +93,36 @@ describe('for admin', () => {
         const response4 = await request(app)
             .patch("/api/product/" + productId)
             .send(productPatchName)
-            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Authorization', `Bearer ${adminToken1}`)
         expect(response4.statusCode).toBe(200)
         expect(response4.body.name).toBe(productPatchName.name)
 
         const response5 = await request(app)
             .patch("/api/product/" + Number.MAX_SAFE_INTEGER)
             .send(productPatchName)
-            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Authorization', `Bearer ${adminToken1}`)
         expect(response5.statusCode).toBe(404)
 
         const response6 = await request(app)
             .patch("/api/product/" + productId)
             .send({"price": "wrong"})
-            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Authorization', `Bearer ${adminToken1}`)
         expect(response6.statusCode).toBe(400)
 
         const response7 = await request(app)
             .delete("/api/product/" + Number.MAX_SAFE_INTEGER)
-            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Authorization', `Bearer ${adminToken1}`)
         expect(response7.statusCode).toBe(404)
 
         const response9 = await request(app)
             .delete("/api/product/" + productId)
-            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Authorization', `Bearer ${adminToken1}`)
         expect(response9.statusCode).toBe(200)
         expect(response9.body.deleted).toBe(productId)
     })
 
 
     afterAll(async () => {
-        await admin.destroy()
+        await admin1.destroy()
     })
 })
