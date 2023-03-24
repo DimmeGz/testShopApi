@@ -49,8 +49,8 @@
   },
   "scripts": {
     "test": "tsc && jest --coverage",
-    "serve": "tsc && nodemon dist/app.js",
-    "start": "tsc && node dist/app.js"
+    "serve": "tsc && nodemon dist/server.js",
+    "start": "tsc && node dist/server.js"
   },
   "keywords": [],
   "author": "",

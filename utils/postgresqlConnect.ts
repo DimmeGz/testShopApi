@@ -1,6 +1,11 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 import {Sequelize} from 'sequelize'
 
-export const sequelize = new Sequelize(process.env.PSQL_URL!)
+export const sequelize = new Sequelize(process.env.PSQL_URL!, {
+    dialect: 'postgres'
+})
 
 export async function connectDB() {
     try {

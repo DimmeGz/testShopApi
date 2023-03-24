@@ -26,3 +26,11 @@ export const adminUser = {
     "email": "test_admin@example.com",
     "role": "admin"
 }
+
+export const testUser: any = {
+    "name": "test_user",
+    "password": "password",
+    "phone": "+380987654321",
+    "email": "test_user@example.com",
+    "role": "user"
+}

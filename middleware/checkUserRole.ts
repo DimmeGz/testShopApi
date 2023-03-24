@@ -13,8 +13,9 @@ export async function checkUserRole(req: Request, res: Response, next: any){
             const user: any = await User.findOne({ where: { [Op.or]: [{ email: authField }, { phone: authField }]}})
             if (user.role === 'admin') {
                 req.userRole = 'admin'
+            } else {
+                next()
             }
-            next()
         } catch (e) {
             next()
         }

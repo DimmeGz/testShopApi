@@ -1,6 +1,5 @@
 import request from 'supertest';
 import app from '../app';
-import {productPatchBody} from './mockData/mockProduct';
 import {userPatchPhone, userPostBody, incorrectUserPostBody, adminUser} from './mockData/mockUser'
 import {User} from '../user/user.model';
 import jwt from 'jsonwebtoken';
