@@ -31,6 +31,5 @@ export const testUser: any = {
     "name": "test_user",
     "password": "password",
     "phone": "+380987654321",
-    "email": "test_user@example.com",
-    "role": "user"
+    "email": "test_user@example.com"
 }

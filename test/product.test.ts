@@ -7,13 +7,13 @@ import {productPatchName, productPostBody} from './mockData/mockProduct';
 import {Product} from '../catalog/product.model';
 
 describe('for unauthorized', () => {
-    let user: any
-    let userToken: any
+    let user1: any
+    let userToken1: any
     beforeAll(async () => {
-        user = await User.create(testUser)
+        user1 = await User.create(testUser)
         const JWTKey = process.env.JWT_SECRET
-        const body = { email: user.email }
-        userToken = jwt.sign({ user: body }, JWTKey!)
+        const body = { email: user1.email }
+        userToken1 = jwt.sign({ user: body }, JWTKey!)
     })
 
     it('unauthorized test', async () => {
@@ -29,24 +29,24 @@ describe('for unauthorized', () => {
         const response2 = await request(app)
             .post("/api/product/")
             .send(productPostBody)
-            .set('Authorization', `Bearer ${userToken}`)
+            .set('Authorization', `Bearer ${userToken1}`)
         expect(response2.statusCode).toBe(403)
 
         const randomProduct = await Product.findOne()
         const response3 = await request(app)
             .patch("/api/product/" + randomProduct!.id)
             .send(productPatchName)
-            .set('Authorization', `Bearer ${userToken}`)
+            .set('Authorization', `Bearer ${userToken1}`)
         expect(response3.statusCode).toBe(403)
 
         const response4 = await request(app)
             .delete("/api/product/" + randomProduct!.id)
-            .set('Authorization', `Bearer ${userToken}`)
+            .set('Authorization', `Bearer ${userToken1}`)
         expect(response3.statusCode).toBe(403)
     })
 
     afterAll(async () => {
-        await user.destroy()
+        await user1.destroy()
     })
 })
 
