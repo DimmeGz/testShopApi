@@ -1,7 +1,3 @@
-// import {User} from '../../user/user.model'
-//
-// const createdUser = await User.create({name, phone, email, password: hashed_password, role: 'user'})
-
 export const userPostBody: any = {
     "name": "test_user",
     "password": "password",
