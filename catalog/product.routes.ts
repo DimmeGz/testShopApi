@@ -4,7 +4,7 @@ import passport from "../middleware/passport"
 import {Product} from './product.model'
 import {OrderRow} from '../order/order.models'
 import {getPaginationParameters} from "../utils/functions"
-import {checkUser} from '../middleware/checkUser'
+import {checkUserRole} from '../middleware/checkUserRole'
 
 export const router = Router()
 
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/:id', checkUser,
+router.get('/:id', checkUserRole,
     async (req, res) => {
     try {
         const product = await Product.findByPk(req.params.id)

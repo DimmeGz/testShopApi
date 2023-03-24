@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import {Op} from 'sequelize'
 import {User} from '../user/user.model'
 
-export async function checkUser(req: Request, res: Response, next: any){
+export async function checkUserRole(req: Request, res: Response, next: any){
     if (req.headers && req.headers.authorization) {
         const authorization = req.headers.authorization.split(' ')[1]
         try {
