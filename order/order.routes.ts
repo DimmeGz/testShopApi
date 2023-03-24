@@ -33,7 +33,7 @@ router.get('/',
             res.status(200).json({page, totalPages: totalPages.count, elementsCount, data})
         }
     } catch (e) {
-        res.status(404).json('Bad request')
+        res.status(500).json({message: 'something went wrong'})
     }
 })
 
@@ -71,7 +71,7 @@ router.post('/',
 
             res.status(201).json({order, rows: resRows})
         } catch (e) {
-            res.status(404).json('Bad request')
+            res.status(400).json('Incorrect data')
         }
     })
 
@@ -120,8 +120,7 @@ router.patch('/:id',
 
             res.status(200).json({order, rows: resRows})
         } catch (e: any) {
-            console.log(e.message)
-            res.status(404).json({message: 'Bad request'})
+            res.status(400).json({message: 'Incorrect data'})
         }
     })
 
