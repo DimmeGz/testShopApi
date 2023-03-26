@@ -24,8 +24,8 @@ export const adminUser = {
 }
 
 export const testUser: any = {
-    "name": "test_user",
+    "name": "test_user1",
     "password": "password",
-    "phone": "+380987654321",
-    "email": "test_user@example.com"
+    "phone": "+380987654322",
+    "email": "test_user1@example.com"
 }

@@ -6,7 +6,6 @@ const joiSchema = Joi.object({
     SECRET_KEY: Joi.string().required(),
     PORT: Joi.string().required(),
     JWT_SECRET: Joi.string().required(),
-    PSQL_URL: Joi.string().required(),
 })
 
 async function getFile () {

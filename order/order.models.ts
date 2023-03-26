@@ -1,6 +1,7 @@
 import {CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model} from 'sequelize'
 import {sequelize} from '../utils/postgresqlConnect'
 import {User} from '../user/user.model'
+import {Product} from "../catalog/product.model"
 
 interface OrderModel extends Model<InferAttributes<OrderModel>, InferCreationAttributes<OrderModel>> {
     id: CreationOptional<number>

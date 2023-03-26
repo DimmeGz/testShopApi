@@ -1,7 +1,7 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
 import {sequelize} from '../utils/postgresqlConnect'
 import {User} from '../user/user.model';
-import {Order} from '../order/order.models';
+import {Order, OrderRow} from '../order/order.models';
 
 interface ProductModel extends Model<InferAttributes<ProductModel>, InferCreationAttributes<ProductModel>> {
     id: CreationOptional<number>
@@ -41,3 +41,6 @@ export const Product = sequelize.define<ProductModel>('Product', {
         type: DataTypes.SMALLINT
     }
 })
+
+Product.hasMany(OrderRow)
+OrderRow.belongsTo(Product)
