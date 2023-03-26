@@ -87,7 +87,7 @@ router.patch('/:id',
                 return
             }
             if (!_.isEqual(order.UserId, req.user?.id) && req.user?.role !== 'admin') {
-                res.status(403).json({message: 'You don\'t have permission to access this resource'})
+                res.status(403).json({message: 'Forbidden'})
                 return
             }
             let sum = order.sum

@@ -21,3 +21,11 @@ export const wrongProductPostBody = {
 export const productPatchBody = {
     "name" : "test_product_change"
 }
+
+export const testProduct: any = {
+    "name": "test_product_1",
+    "description": "test_desc_1",
+    "image": "test_img_1",
+    "price": 11,
+    "isAvailable": true
+}
