@@ -66,3 +66,18 @@ export const testUser4: any = {
     "phone": "+380987654325",
     "email": "test_user4@example.com"
 }
+
+export const testAdmin5: any = {
+    "name": "test_admin5",
+    "password": "password",
+    "phone": "+380917655023",
+    "email": "test_admin5@example.com",
+    "role": "admin"
+}
+
+export const testUser5: any = {
+    "name": "test_user5",
+    "password": "password",
+    "phone": "+380987655325",
+    "email": "test_user5@example.com"
+}

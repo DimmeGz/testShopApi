@@ -114,6 +114,7 @@ describe('order routs ', () => {
 
     afterAll(async () => {
         await user2.destroy()
+        await admin2.destroy()
         await product2.destroy()
     })
 })
