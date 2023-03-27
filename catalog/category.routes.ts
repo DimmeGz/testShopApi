@@ -44,7 +44,7 @@ router.post('/', passport.authenticate('jwt', {session: false}),
 
                 res.status(201).json(category)
             } else {
-                res.status(403).json({message: 'You don\'t have permission to access this resource'})
+                res.status(403).json({message: 'Forbidden'})
             }
         } catch (e) {
             res.status(400).json({message: 'Incorrect data'})
@@ -67,7 +67,7 @@ router.patch('/:id',
                 await category.save()
                 res.status(200).json(category)
             } else {
-                res.status(403).json({message: 'You don\'t have permission to access this resource'})
+                res.status(403).json({message: 'Forbidden'})
             }
         } catch (e) {
             res.status(404).json({message: 'Bad request'})
@@ -90,7 +90,7 @@ router.delete('/:id',
                 category?.destroy()
                 res.status(200).json({ deleted: category.id })
             } else {
-                res.status(403).json({message: 'You don\'t have permission to access this resource'})
+                res.status(403).json({message: 'Forbidden'})
             }
         } catch (e) {
             res.status(404).json({message: 'Bad request'})

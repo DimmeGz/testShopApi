@@ -29,3 +29,11 @@ export const testProduct: any = {
     "price": 11,
     "isAvailable": true
 }
+
+export const testProduct4: any = {
+    "name": "test_product_4",
+    "description": "test_desc_4",
+    "image": "test_img_4",
+    "price": 44,
+    "isAvailable": true
+}
