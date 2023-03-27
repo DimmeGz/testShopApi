@@ -6,3 +6,4 @@ config/
 models/
 coverage
 database.sqlite
+migrations/

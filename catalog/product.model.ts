@@ -10,6 +10,8 @@ interface ProductModel extends Model<InferAttributes<ProductModel>, InferCreatio
     price: number
     isAvailable: boolean
     CategoryId: number
+    buyersCount: number
+    rating: number
 }
 
 export const Product = sequelize.define<ProductModel>('Product', {
@@ -37,6 +39,14 @@ export const Product = sequelize.define<ProductModel>('Product', {
     },
     CategoryId: {
         type: DataTypes.SMALLINT
+    },
+    buyersCount: {
+        type: DataTypes.SMALLINT,
+        allowNull: true,
+    },
+    rating: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
     }
 })
 
