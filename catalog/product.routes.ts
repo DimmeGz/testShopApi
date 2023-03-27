@@ -2,6 +2,7 @@ import express, {Router} from 'express'
 import passport from "../middleware/passport"
 
 import {Product} from './product.model'
+import {Rating} from './rating.model'
 import {OrderRow} from '../order/order.models'
 import {Comment} from './comments.model'
 import {getPaginationParameters} from "../utils/functions"
@@ -124,6 +125,10 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }),
             const comments = await Comment.findAll({where: {ProductId: product.id}})
             for (let comment of comments) {
                 await comment.destroy()
+            }
+            const ratings = await Rating.findAll({where: {ProductId: product.id}})
+            for (let rating of ratings) {
+                await rating.destroy()
             }
             res.status(200).json({ deleted: product.id })
         } else {
