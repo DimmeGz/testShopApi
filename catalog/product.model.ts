@@ -6,7 +6,6 @@ interface ProductModel extends Model<InferAttributes<ProductModel>, InferCreatio
     id: CreationOptional<number>
     name: string
     description: string
-    image: string
     price: number
     isAvailable: boolean
     CategoryId: number
@@ -25,9 +24,6 @@ export const Product = sequelize.define<ProductModel>('Product', {
     },
     description: {
         type: DataTypes.STRING,
-    },
-    image: {
-        type: DataTypes.STRING
     },
     price: {
         type: DataTypes.FLOAT,
