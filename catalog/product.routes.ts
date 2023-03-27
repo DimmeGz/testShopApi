@@ -25,17 +25,17 @@ router.get('/', async (req, res) => {
 
 router.get('/:id',
     async (req, res) => {
-    try {
-        const product = await Product.findByPk(req.params.id)
-        if (!product) {
-            res.status(404).json({message: 'Product does not exist'})
-            return
+        try {
+            const product = await Product.findByPk(req.params.id)
+            if (!product) {
+                res.status(404).json({message: 'Product does not exist'})
+                return
+            }
+            res.status(200).json(product)
+        } catch (e) {
+            res.status(404).json(e)
         }
-        res.status(200).json(product)
-    } catch (e) {
-        res.status(404).json(e)
-    }
-})
+    })
 
 router.get('/:id/get_comments',
     async (req, res) => {
@@ -52,7 +52,7 @@ router.get('/:id/get_comments',
         }
     })
 
-router.get('/:id/get_statistics', passport.authenticate('jwt', { session: false }),
+router.get('/:id/get_statistics', passport.authenticate('jwt', {session: false}),
     async (req, res) => {
         try {
             if (req.user?.role === 'admin') {
@@ -62,7 +62,9 @@ router.get('/:id/get_statistics', passport.authenticate('jwt', { session: false 
                     return
                 }
                 const orderRows = await OrderRow.findAll({where: {ProductId: product?.id}})
-                const totalSales = orderRows.reduce(function (acc, obj) { return acc + obj.qty }, 0)
+                const totalSales = orderRows.reduce(function (acc, obj) {
+                    return acc + obj.qty
+                }, 0)
                 res.status(200).json({product, totalSales})
             } else {
                 res.status(403).json({message: 'Forbidden'})
@@ -72,7 +74,7 @@ router.get('/:id/get_statistics', passport.authenticate('jwt', { session: false 
         }
     })
 
-router.post('/', passport.authenticate('jwt', { session: false }),
+router.post('/', passport.authenticate('jwt', {session: false}),
     async (req: express.Request, res: express.Response) => {
         try {
             if (req.user?.role === 'admin') {
@@ -81,7 +83,16 @@ router.post('/', passport.authenticate('jwt', { session: false }),
                     return res.status(400).json({message: 'Such product exists'})
                 }
 
-                const product = await Product.create(req.body)
+                const product = await Product.create({
+                    name: req.body.name,
+                    description: req.body.description,
+                    price: req.body.price,
+                    isAvailable: req.body.isAvailable,
+                    CategoryId: req.body.CategoryId,
+                    buyersCount: 0,
+                    rating: 0,
+                    count: req.body.count
+                })
 
                 res.status(201).json(product)
             } else {
@@ -92,7 +103,7 @@ router.post('/', passport.authenticate('jwt', { session: false }),
         }
     })
 
-router.patch('/:id', passport.authenticate('jwt', { session: false }),
+router.patch('/:id', passport.authenticate('jwt', {session: false}),
     async (req: express.Request, res: express.Response) => {
         try {
             if (req.user?.role === 'admin') {
@@ -113,37 +124,37 @@ router.patch('/:id', passport.authenticate('jwt', { session: false }),
         }
     })
 
-router.delete('/:id', passport.authenticate('jwt', { session: false }),
+router.delete('/:id', passport.authenticate('jwt', {session: false}),
     async (req, res) => {
-    try {
-        if (req.user?.role === 'admin') {
-            const product = await Product.findByPk(req.params.id)
-            if (!product) {
-                res.status(404).json({message: 'Product does not exist'})
-                return
-            }
-            await product.destroy()
-
-            async function deleteRelated(objList: any) {
-                for (let obj of objList) {
-                    await obj.destroy()
+        try {
+            if (req.user?.role === 'admin') {
+                const product = await Product.findByPk(req.params.id)
+                if (!product) {
+                    res.status(404).json({message: 'Product does not exist'})
+                    return
                 }
+                await product.destroy()
+
+                async function deleteRelated(objList: any) {
+                    for (let obj of objList) {
+                        await obj.destroy()
+                    }
+                }
+
+                const comments = await Comment.findAll({where: {ProductId: product.id}})
+                await deleteRelated(comments)
+
+                const ratings = await Rating.findAll({where: {ProductId: product.id}})
+                await deleteRelated(ratings)
+
+                const images = await Image.findAll({where: {ProductId: product.id}})
+                await deleteRelated(images)
+
+                res.status(200).json({deleted: product.id})
+            } else {
+                res.status(403).json({message: 'You don\'t have permission to access this resource'})
             }
-
-            const comments = await Comment.findAll({where: {ProductId: product.id}})
-            await deleteRelated(comments)
-
-            const ratings = await Rating.findAll({where: {ProductId: product.id}})
-            await deleteRelated(ratings)
-
-            const images = await Image.findAll({where: {ProductId: product.id}})
-            await deleteRelated(images)
-
-            res.status(200).json({ deleted: product.id })
-        } else {
-            res.status(403).json({message: 'You don\'t have permission to access this resource'})
+        } catch (e) {
+            res.status(404).json({message: 'Bad request'})
         }
-    } catch (e) {
-        res.status(404).json({message: 'Bad request'})
-    }
-})
+    })

@@ -39,6 +39,8 @@ const productPostJoiSchema = Joi.object({
         .optional(),
     CategoryId: Joi.number()
         .optional(),
+    count: Joi.number()
+        .optional(),
 })
 
 const productPatchJoiSchema = Joi.object({
@@ -56,6 +58,8 @@ const productPatchJoiSchema = Joi.object({
     image: Joi.string()
         .optional(),
     CategoryId: Joi.number()
+        .optional(),
+    count: Joi.number()
         .optional(),
 })
 
