@@ -60,7 +60,7 @@ router.get('/:id/get_statistics', passport.authenticate('jwt', { session: false 
                     return
                 }
                 const orderRows = await OrderRow.findAll({where: {ProductId: product?.id}})
-                const totalSales = orderRows.reduce(function (acc, obj) { return acc + obj.qty; }, 0)
+                const totalSales = orderRows.reduce(function (acc, obj) { return acc + obj.qty }, 0)
                 res.status(200).json({product, totalSales})
             } else {
                 res.status(403).json({message: 'Forbidden'})

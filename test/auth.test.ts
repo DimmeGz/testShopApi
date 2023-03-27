@@ -1,9 +1,8 @@
-import {User} from '../user/user.model';
-import {testUser3} from './mockData/mockUser';
-import jwt from 'jsonwebtoken';
-import request from 'supertest';
-import app from '../app';
-import bcrypt from 'bcryptjs';
+import {User} from '../user/user.model'
+import {testUser3} from './mockData/mockUser'
+import request from 'supertest'
+import app from '../app'
+import bcrypt from 'bcryptjs'
 
 describe('Authentication test', () => {
     let user3: any

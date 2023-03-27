@@ -1,8 +1,8 @@
-import request from 'supertest';
-import app from '../app';
+import request from 'supertest'
+import app from '../app'
 import {userPatchPhone, userPostBody, incorrectUserPostBody, adminUser} from './mockData/mockUser'
-import {User} from '../user/user.model';
-import jwt from 'jsonwebtoken';
+import {User} from '../user/user.model'
+import jwt from 'jsonwebtoken'
 
 describe("Test the user routes", () => {
     describe('get user list', () => {

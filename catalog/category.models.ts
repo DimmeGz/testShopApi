@@ -4,7 +4,7 @@ import {Product} from './product.model'
 
 interface CategoryModel extends Model<InferAttributes<CategoryModel>, InferCreationAttributes<CategoryModel>> {
     id: CreationOptional<number>
-    name: string;
+    name: string
     description: string
 
 }

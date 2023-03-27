@@ -4,7 +4,7 @@ import {testAdmin4, testUser4} from './mockData/mockUser'
 import {User} from '../user/user.model'
 import {testProduct4} from './mockData/mockProduct'
 import jwt from 'jsonwebtoken'
-import {Product} from '../catalog/product.model';
+import {Product} from '../catalog/product.model'
 
 describe('Category test', () => {
     let admin4: any

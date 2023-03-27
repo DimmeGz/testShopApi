@@ -4,7 +4,7 @@ import {Order, OrderRow} from '../order/order.models'
 
 interface ProductModel extends Model<InferAttributes<ProductModel>, InferCreationAttributes<ProductModel>> {
     id: CreationOptional<number>
-    name: string;
+    name: string
     description: string
     image: string
     price: number

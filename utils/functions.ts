@@ -8,7 +8,7 @@ export function getPaginationParameters(req: any){
 }
 
 interface IUserRole {
-    userRole: string;
+    userRole: string
 }
 
 declare global {
