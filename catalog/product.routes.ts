@@ -63,7 +63,7 @@ router.get('/:id/get_statistics', passport.authenticate('jwt', { session: false 
                 const totalSales = orderRows.reduce(function (acc, obj) { return acc + obj.qty; }, 0)
                 res.status(200).json({product, totalSales})
             } else {
-                res.status(401).json({message: 'Forbidden'})
+                res.status(403).json({message: 'Forbidden'})
             }
         } catch (e) {
             res.status(404).json(e)

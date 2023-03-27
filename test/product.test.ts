@@ -1,7 +1,9 @@
 import request from 'supertest';
 import app from '../app';
 import {User} from '../user/user.model';
+import {Comment} from '../catalog/comments.model';
 import {adminUser, testUser} from './mockData/mockUser';
+import {testComment} from './mockData/mockComment';
 import jwt from 'jsonwebtoken';
 import {productPatchName, productPostBody} from './mockData/mockProduct';
 import {Product} from '../catalog/product.model';
@@ -12,8 +14,8 @@ describe('for unauthorized', () => {
     beforeAll(async () => {
         user1 = await User.create(testUser)
         const JWTKey = process.env.JWT_SECRET
-        const body = { email: user1.email }
-        userToken1 = jwt.sign({ user: body }, JWTKey!)
+        const body = {email: user1.email}
+        userToken1 = jwt.sign({user: body}, JWTKey!)
     })
 
     it('unauthorized test', async () => {
@@ -56,8 +58,8 @@ describe('for admin', () => {
     beforeAll(async () => {
         admin1 = await User.create(adminUser)
         const JWTKey = process.env.JWT_SECRET
-        const body = { email: admin1.email }
-        adminToken1 = jwt.sign({ user: body }, JWTKey!)
+        const body = {email: admin1.email}
+        adminToken1 = jwt.sign({user: body}, JWTKey!)
     })
 
     it('admin test ', async () => {
@@ -69,11 +71,41 @@ describe('for admin', () => {
         expect(response.body.name).toBe(productPostBody.name)
         const productId = response.body.id
 
+        const comment = await Comment.create({
+            "text": testComment.text,
+            "rating": testComment.rating,
+            "ProductId": productId,
+            "UserId": admin1.id
+        })
+
         const response1 = await request(app)
             .post("/api/product/")
             .send(productPostBody)
             .set('Authorization', `Bearer ${adminToken1}`)
         expect(response1.statusCode).toBe(400)
+
+        const responseComment = await request(app)
+            .get("/api/product/" + productId + "/get_comments")
+        expect(responseComment.statusCode).toBe(200)
+        expect(responseComment.body[0].ProductId).toBe(productId)
+
+        const responseComment1 = await request(app)
+            .get("/api/product/" + Number.MAX_SAFE_INTEGER + "/get_comments")
+        expect(responseComment1.statusCode).toBe(404)
+
+        const responseStatistics = await request(app)
+            .get("/api/product/" + productId + "/get_statistics")
+            .set('Authorization', `Bearer ${adminToken1}`)
+        expect(responseStatistics.statusCode).toBe(200)
+
+        const responseStatistics1 = await request(app)
+            .get("/api/product/" + productId + "/get_statistics")
+        expect(responseStatistics1.statusCode).toBe(401)
+
+        const responseStatistics2 = await request(app)
+            .get("/api/product/" + Number.MAX_SAFE_INTEGER + "/get_statistics")
+            .set('Authorization', `Bearer ${adminToken1}`)
+        expect(responseStatistics2.statusCode).toBe(404)
 
         const response2 = await request(app)
             .get("/api/product/" + productId)
