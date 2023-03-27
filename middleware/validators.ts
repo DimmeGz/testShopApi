@@ -119,7 +119,6 @@ const authJoiSchema = Joi.alternatives(authEmailJoiSchema , authPhoneJoiSchema)
 
 const commentSchema = {
     text: Joi.string(),
-    rating: Joi.number().min(0).max(5),
     ProductId: Joi.number().external(existingProduct).optional()
 }
 

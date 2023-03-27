@@ -1,4 +1,3 @@
 export const testComment: any = {
-    "text": "comment_text",
-    "rating": 1
+    "text": "comment_text"
 }

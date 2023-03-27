@@ -45,8 +45,8 @@ router.post('/', passport.authenticate('jwt', {session: false}),
     async (req, res) => {
         try {
             const UserId = req.user!.id
-            const {text, rating, ProductId} = req.body
-            const comment = await Comment.create({text, rating, UserId, ProductId})
+            const {text, ProductId} = req.body
+            const comment = await Comment.create({text, UserId, ProductId})
             res.status(201).json(comment)
         } catch (e: any) {
             res.status(404).json(e.message)

@@ -73,7 +73,6 @@ describe('for admin', () => {
 
         const comment = await Comment.create({
             "text": testComment.text,
-            "rating": testComment.rating,
             "ProductId": productId,
             "UserId": admin1.id
         })

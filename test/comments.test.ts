@@ -33,12 +33,12 @@ describe("Test comments routes", () => {
 
         const responsePost = await request(app)
             .post("/api/comment/")
-            .send({"ProductId": product5.id, "text": "401_comment", "rating": 1})
+            .send({"ProductId": product5.id, "text": "401_comment"})
         expect(responsePost.statusCode).toBe(401)
 
         const responsePost1 = await request(app)
             .post("/api/comment/")
-            .send({"ProductId": product5.id, "text": "401_comment", "rating": 1})
+            .send({"ProductId": product5.id, "text": "201_comment"})
             .set('Authorization', `Bearer ${userToken5}`)
         expect(responsePost1.statusCode).toBe(201)
         const commentId =responsePost1.body.id
@@ -53,24 +53,24 @@ describe("Test comments routes", () => {
 
         const responsePatch = await request(app)
             .patch("/api/comment/" + commentId)
-            .send({"rating": 4})
+            .send({"text": "updated_comment"})
             .set('Authorization', `Bearer ${userToken5}`)
         expect(responsePatch.statusCode).toBe(200)
 
         const responsePatch1 = await request(app)
             .patch("/api/comment/" + commentId)
-            .send({"rating": 4})
+            .send({"text": "updated_comment"})
         expect(responsePatch1.statusCode).toBe(401)
 
         const responsePatch2 = await request(app)
             .patch("/api/comment/" + randomComment?.id)
-            .send({"rating": 4})
+            .send({"text": "updated_comment"})
             .set('Authorization', `Bearer ${userToken5}`)
         expect(responsePatch2.statusCode).toBe(403)
 
         const responsePatch3 = await request(app)
             .patch("/api/comment/" + Number.MAX_SAFE_INTEGER)
-            .send({"rating": 4})
+            .send({"text": "updated_comment"})
             .set('Authorization', `Bearer ${userToken5}`)
         expect(responsePatch3.statusCode).toBe(404)
 

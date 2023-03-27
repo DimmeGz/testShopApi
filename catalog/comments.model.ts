@@ -8,7 +8,6 @@ interface CommentModel extends Model<InferAttributes<CommentModel>, InferCreatio
     ProductId: number
     UserId: number
     text: string
-    rating: number
 }
 
 export const Comment = sequelize.define<CommentModel>('Comment', {
@@ -26,6 +25,33 @@ export const Comment = sequelize.define<CommentModel>('Comment', {
     text: {
         type: DataTypes.STRING,
         allowNull: false,
+    }
+})
+
+Product.hasMany(Comment)
+Comment.belongsTo(Product)
+
+User.hasMany(Comment)
+Comment.belongsTo(User)
+
+interface RatingModel extends Model<InferAttributes<RatingModel>, InferCreationAttributes<RatingModel>> {
+    id: CreationOptional<number>
+    UserId: number
+    ProductId: number
+    rating: number
+}
+
+export const Rating = sequelize.define<RatingModel>('Rating', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+    ProductId: {
+        type: DataTypes.SMALLINT
+    },
+    UserId: {
+        type: DataTypes.SMALLINT
     },
     rating: {
         type: DataTypes.SMALLINT,
@@ -36,8 +62,8 @@ export const Comment = sequelize.define<CommentModel>('Comment', {
     }
 })
 
-Product.hasMany(Comment)
-Comment.belongsTo(Product)
+Product.hasMany(Rating)
+Rating.belongsTo(Product)
 
-User.hasMany(Comment)
-Comment.belongsTo(User)
+User.hasMany(Rating)
+Rating.belongsTo(User)
