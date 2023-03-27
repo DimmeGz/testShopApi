@@ -38,7 +38,7 @@ export const Product = sequelize.define<ProductModel>('Product', {
     },
     buyersCount: {
         type: DataTypes.SMALLINT,
-        allowNull: true,
+        defaultValue: 0
     },
     rating: {
         type: DataTypes.FLOAT,

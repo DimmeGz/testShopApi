@@ -17,11 +17,16 @@ async function getOrder(req: Request, res: Response) {
     return order
 }
 
-async function calcOrderSum(OrderId: number, rows: any) {
+async function calcOrderSum(OrderId: number, rows: any, status: string) {
     let sum = 0
     let resRows = []
     for (let row of rows) {
         const newRow = await OrderRow.create({OrderId, ProductId: row.ProductId, qty: row.qty})
+        if (status === 'completed') {
+            const product = await Product.findByPk(row.ProductId)
+            product!.buyersCount += 1
+            await product!.save()
+        }
         resRows.push(newRow)
         const product = await Product.findByPk(row.ProductId)
         sum += row.qty * product!.price
@@ -77,7 +82,7 @@ router.post('/',
 
             const order = await Order.create({UserId, status, sum: 0})
 
-            let result = await calcOrderSum(order.id, rows)
+            let result = await calcOrderSum(order.id, rows, order.status)
             order.sum = result.sum
             resRows = result.resRows
             await order.save()
@@ -91,8 +96,8 @@ router.post('/',
 router.patch('/:id',
     async (req: Request, res: Response) => {
         try {
-            const {status, rows} = req.body
-            let {UserId} = req.body
+            const {rows} = req.body
+            let {status, UserId} = req.body
             const order = await Order.findByPk(req.params.id)
 
             if (!order) {
@@ -109,13 +114,35 @@ router.patch('/:id',
             if (rows) {
                 // Delete existing orderRows from DB and set sum = 0
                 for (let oldRow of resRows) {
+                    if (order?.status === 'completed') {
+                        const product = await Product.findByPk(oldRow.ProductId)
+                        product!.buyersCount -= 1
+                        await product!.save()
+                    }
                     await oldRow.destroy()
                 }
                 resRows = []
 
-                let result = await calcOrderSum(order.id, rows)
+                if (!status){
+                    status = order.status
+                }
+                let result = await calcOrderSum(order.id, rows, status)
                 sum = result.sum
                 resRows = result.resRows
+            } else {
+                if (status && status !== 'completed' && order?.status === 'completed') {
+                    for (let row of resRows) {
+                        const product = await Product.findByPk(row.ProductId)
+                        product!.buyersCount -= 1
+                        await product!.save()
+                    }
+                } else if (status && status === 'completed' && order?.status !== 'completed') {
+                    for (let row of resRows) {
+                        const product = await Product.findByPk(row.ProductId)
+                        product!.buyersCount += 1
+                        await product!.save()
+                    }
+                }
             }
             if (UserId) {
                 if (UserId !== req.user?.id && req.user?.role !== 'admin') {
@@ -138,6 +165,11 @@ router.delete('/:id', async (req, res) => {
 
         const rows = await OrderRow.findAll({where: {OrderId: order.id}})
         for (let row of rows) {
+            if (order.status === 'completed') {
+                const product = await Product.findByPk(row.ProductId)
+                product!.buyersCount -= 1
+                await product!.save()
+            }
             await row.destroy()
         }
 
