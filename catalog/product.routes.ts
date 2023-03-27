@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/:id', checkUserRole,
+router.get('/:id',
     async (req, res) => {
     try {
         const product = await Product.findByPk(req.params.id)
@@ -30,18 +30,46 @@ router.get('/:id', checkUserRole,
             res.status(404).json({message: 'Product does not exist'})
             return
         }
-
-        if (req.userRole !== 'admin') {
-            res.status(200).json(product)
-        } else {
-            const orderRows = await OrderRow.findAll({where: {ProductId: product.id}})
-            const totalSales = orderRows.reduce(function (acc, obj) { return acc + obj.qty; }, 0)
-            res.status(200).json({product, totalSales})
-        }
+        res.status(200).json(product)
     } catch (e) {
         res.status(404).json(e)
     }
 })
+
+router.get('/:id/get_comments',
+    async (req, res) => {
+        try {
+            const product = await Product.findByPk(req.params.id)
+            if (!product) {
+                res.status(404).json({message: 'Product does not exist'})
+                return
+            }
+            const comments = await Comment.findAll({where: {ProductId: req.params.id}})
+            res.status(200).json(comments)
+        } catch (e) {
+            res.status(404).json(e)
+        }
+    })
+
+router.get('/:id/get_statistics', passport.authenticate('jwt', { session: false }),
+    async (req, res) => {
+        try {
+            if (req.user?.role === 'admin') {
+                const product = await Product.findByPk(req.params.id)
+                if (!product) {
+                    res.status(404).json({message: 'Product does not exist'})
+                    return
+                }
+                const orderRows = await OrderRow.findAll({where: {ProductId: product?.id}})
+                const totalSales = orderRows.reduce(function (acc, obj) { return acc + obj.qty; }, 0)
+                res.status(200).json({product, totalSales})
+            } else {
+                res.status(401).json({message: 'Forbidden'})
+            }
+        } catch (e) {
+            res.status(404).json(e)
+        }
+    })
 
 router.post('/', passport.authenticate('jwt', { session: false }),
     async (req: express.Request, res: express.Response) => {

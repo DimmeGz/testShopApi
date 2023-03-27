@@ -84,7 +84,6 @@ describe('for admin', () => {
             .get("/api/product/" + productId)
             .set('Authorization', `Bearer ${adminToken1}`)
         expect(response2Admin.statusCode).toBe(200)
-        expect(response2Admin.body.totalSales).toBe(0)
 
         const response3 = await request(app)
             .get("/api/product/" + Number.MAX_SAFE_INTEGER)
