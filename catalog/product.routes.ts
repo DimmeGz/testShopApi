@@ -5,7 +5,6 @@ import {Product} from './product.model'
 import {OrderRow} from '../order/order.models'
 import {Comment} from './comments.model'
 import {getPaginationParameters} from "../utils/functions"
-import {checkUserRole} from '../middleware/checkUserRole'
 
 export const router = Router()
 
