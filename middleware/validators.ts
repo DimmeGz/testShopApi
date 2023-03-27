@@ -119,7 +119,8 @@ const authJoiSchema = Joi.alternatives(authEmailJoiSchema , authPhoneJoiSchema)
 
 const commentSchema = {
     text: Joi.string(),
-    rating: Joi.number().min(0).max(5)
+    rating: Joi.number().min(0).max(5),
+    ProductId: Joi.number().external(existingProduct).optional()
 }
 
 const commentPostJoiSchema = Joi.object(commentSchema)
@@ -161,7 +162,6 @@ export async function dataValidation(req: Request, res: Response, next: any) {
             res.status(400).json({message: e.message})
         }
     }
-    console.log(targetApi)
 
     if (!schema[targetApi] || !schema[targetApi][req.method]) {
         next()

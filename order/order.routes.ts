@@ -6,7 +6,7 @@ import {getPaginationParameters} from "../utils/functions"
 
 export const router = Router()
 
-async function getOrder (req: Request, res: Response) {
+async function getOrder(req: Request, res: Response) {
     const order = await Order.findByPk(req.params.id)
     if (!order) {
         throw new Error('Order does not exist')
@@ -17,36 +17,53 @@ async function getOrder (req: Request, res: Response) {
     return order
 }
 
+async function calcOrderSum(OrderId: number, rows: any) {
+    let sum = 0
+    let resRows = []
+    for (let row of rows) {
+        const newRow = await OrderRow.create({OrderId, ProductId: row.ProductId, qty: row.qty})
+        resRows.push(newRow)
+        const product = await Product.findByPk(row.ProductId)
+        sum += row.qty * product!.price
+    }
+    return {sum, resRows}
+}
+
 router.get('/',
     async (req: Request, res: Response) => {
-    try {
-        const {page, elementsCount, skipIndex} = getPaginationParameters(req)
-        if (req.user?.role === 'admin') {
-            const totalPages = Math.ceil(await Order.count() / elementsCount)
+        try {
+            const {page, elementsCount, skipIndex} = getPaginationParameters(req)
+            if (req.user?.role === 'admin') {
+                const totalPages = Math.ceil(await Order.count() / elementsCount)
 
-            const data = await Order.findAll({order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})
-            res.status(200).json({page, totalPages, elementsCount, data})
-        } else {
-            const totalPages = await Order.findAndCountAll({where: {UserId: req.user?.id}})
+                const data = await Order.findAll({order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})
+                res.status(200).json({page, totalPages, elementsCount, data})
+            } else {
+                const totalPages = await Order.findAndCountAll({where: {UserId: req.user?.id}})
 
-            const data = await Order.findAll({where: {UserId: req.user?.id}, order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})
-            res.status(200).json({page, totalPages: totalPages.count, elementsCount, data})
+                const data = await Order.findAll({
+                    where: {UserId: req.user?.id},
+                    order: [['id', 'ASC']],
+                    offset: skipIndex,
+                    limit: elementsCount
+                })
+                res.status(200).json({page, totalPages: totalPages.count, elementsCount, data})
+            }
+        } catch (e) {
+            res.status(500).json({message: 'something went wrong'})
         }
-    } catch (e) {
-        res.status(500).json({message: 'something went wrong'})
-    }
-})
+    })
 
 router.get('/:id',
     async (req, res) => {
-    try {
-        const order = await getOrder(req, res)
-        const rows = await OrderRow.findAll({where: {OrderId: order.id}})
-        res.status(200).json({order, rows})
-    } catch (e: any) {
-        res.status(404).json(e.message)
-    }
-})
+        try {
+            const order = await getOrder(req, res)
+            const rows = await OrderRow.findAll({where: {OrderId: order.id}})
+            res.status(200).json({order, rows})
+        } catch (e: any) {
+            res.status(404).json(e.message)
+        }
+    })
 
 router.post('/',
     async (req: Request, res: Response) => {
@@ -56,18 +73,14 @@ router.post('/',
             if (req.user?.role !== 'admin' || !UserId) {
                 UserId = req.user?.id
             }
-            const resRows = []
+            let resRows = []
 
-            let sum = 0
-            const order = await Order.create({UserId, status, sum})
-            for (let row of rows) {
-                const newRow = await OrderRow.create({OrderId: order.id, ProductId: row.ProductId, qty: row.qty})
-                resRows.push(newRow)
-                const product = await Product.findByPk(row.ProductId)
-                sum += row.qty * product!.price
-            }
-            order.sum = sum
-            order.save()
+            const order = await Order.create({UserId, status, sum: 0})
+
+            let result = await calcOrderSum(order.id, rows)
+            order.sum = result.sum
+            resRows = result.resRows
+            await order.save()
 
             res.status(201).json({order, rows: resRows})
         } catch (e) {
@@ -95,19 +108,14 @@ router.patch('/:id',
             let resRows = await OrderRow.findAll({where: {OrderId: order.id}})
             if (rows) {
                 // Delete existing orderRows from DB and set sum = 0
-                sum = 0
                 for (let oldRow of resRows) {
                     await oldRow.destroy()
                 }
                 resRows = []
 
-                // create new orderRows in DB
-                for (let row of rows) {
-                    const newRow = await OrderRow.create({OrderId: order.id, ProductId: row.ProductId, qty: row.qty})
-                    resRows.push(newRow)
-                    const product = await Product.findByPk(row.ProductId)
-                    sum += row.qty * product!.price
-                }
+                let result = await calcOrderSum(order.id, rows)
+                sum = result.sum
+                resRows = result.resRows
             }
             if (UserId) {
                 if (UserId !== req.user?.id && req.user?.role !== 'admin') {
@@ -135,7 +143,7 @@ router.delete('/:id', async (req, res) => {
 
         await order.destroy()
 
-        res.status(200).json({ deleted: order.id })
+        res.status(200).json({deleted: order.id})
     } catch (e: any) {
         res.status(404).json({message: e.message})
     }

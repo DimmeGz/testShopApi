@@ -21,7 +21,7 @@ app.use(express.json())
 app.use(dataValidation)
 
 app.use('/api/product', productRouter)
-app.use('/api/product/:id/comment', commentRouter)
+app.use('/api/comment', commentRouter)
 app.use('/api/category', categoryRouter)
 app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
