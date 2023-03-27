@@ -1,7 +1,6 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes } from 'sequelize'
 import {sequelize} from '../utils/postgresqlConnect'
-import {User} from '../user/user.model';
-import {Order, OrderRow} from '../order/order.models';
+import {Order, OrderRow} from '../order/order.models'
 
 interface ProductModel extends Model<InferAttributes<ProductModel>, InferCreationAttributes<ProductModel>> {
     id: CreationOptional<number>
@@ -11,7 +10,6 @@ interface ProductModel extends Model<InferAttributes<ProductModel>, InferCreatio
     price: number
     isAvailable: boolean
     CategoryId: number
-
 }
 
 export const Product = sequelize.define<ProductModel>('Product', {

@@ -117,6 +117,15 @@ const authPhoneJoiSchema = Joi.object({
 
 const authJoiSchema = Joi.alternatives(authEmailJoiSchema , authPhoneJoiSchema)
 
+const commentSchema = {
+    text: Joi.string(),
+    rating: Joi.number().min(0).max(5)
+}
+
+const commentPostJoiSchema = Joi.object(commentSchema)
+    .fork(Object.keys(commentSchema), (schema) => schema.required())
+const commentPatchJoiSchema = Joi.object(commentSchema)
+
 const schema: Record<string, any> = {
     user: {
         POST: userPostJoiSchema,
@@ -132,11 +141,27 @@ const schema: Record<string, any> = {
     },
     auth: {
         POST: authJoiSchema,
+    },
+    comment: {
+        POST: commentPostJoiSchema,
+        PATCH: commentPatchJoiSchema
     }
 }
 
 export async function dataValidation(req: Request, res: Response, next: any) {
-    const targetApi = req.path.split('/')[2]
+    let targetApi = req.path.split('/')[2]
+
+    if (targetApi === 'product') {
+        try {
+            const newTarget = req.path.split('/')[4]
+            if (newTarget) {
+                targetApi = newTarget
+            }
+        } catch (e: any) {
+            res.status(400).json({message: e.message})
+        }
+    }
+    console.log(targetApi)
 
     if (!schema[targetApi] || !schema[targetApi][req.method]) {
         next()
