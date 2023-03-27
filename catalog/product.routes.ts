@@ -3,6 +3,7 @@ import passport from "../middleware/passport"
 
 import {Product} from './product.model'
 import {OrderRow} from '../order/order.models'
+import {Comment} from './comments.model'
 import {getPaginationParameters} from "../utils/functions"
 import {checkUserRole} from '../middleware/checkUserRole'
 
@@ -93,6 +94,10 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }),
                 return
             }
             await product.destroy()
+            const comments = await Comment.findAll({where: {ProductId: product.id}})
+            for (let comment of comments) {
+                await comment.destroy()
+            }
             res.status(200).json({ deleted: product.id })
         } else {
             res.status(403).json({message: 'You don\'t have permission to access this resource'})
