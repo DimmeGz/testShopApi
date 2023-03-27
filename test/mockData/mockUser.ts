@@ -44,3 +44,10 @@ export const testAdmin2: any = {
     "email": "test_admin2@example.com",
     "role": "admin"
 }
+
+export const testUser3: any = {
+    "name": "test_user3",
+    "password": "password",
+    "phone": "+380987654324",
+    "email": "test_user3@example.com"
+}
