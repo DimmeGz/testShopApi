@@ -1,8 +1,10 @@
 import express, {Router} from 'express'
 
-import {User} from './user.schema'
+import {User} from './user.model'
 import jwt from "jsonwebtoken"
 import passport from "../middleware/passport"
+import {Op} from 'sequelize'
+import bcrypt from 'bcryptjs'
 
 export const router = Router()
 
@@ -10,10 +12,10 @@ router.get('/', passport.authenticate('jwt', { session: false }),
     async (req, res) => {
     try {
         if (req.user?.role === 'admin') {
-            const users = await User.find()
+            const users = await User.findAll()
             res.json(users)
         } else {
-            res.status(403).json({message: 'You don\'t have permission to access this resource'})
+            res.status(403).json({message: 'Forbidden'})
         }
     } catch (e) {
         res.status(500).json({message: 'something went wrong'})
@@ -23,15 +25,15 @@ router.get('/', passport.authenticate('jwt', { session: false }),
 router.get('/:id', passport.authenticate('jwt', { session: false }),
     async (req, res) => {
     try {
-        if (req.user?.role === 'admin' || JSON.stringify(req.params.id) === JSON.stringify(req.user?._id)) {
-            const user = await User.findById(req.params.id)
+        if (req.user?.role === 'admin' || req.params.id === JSON.stringify(req.user?.id)) {
+            const user = await User.findByPk(req.params.id)
             if (!user) {
                 res.status(404).json({message: 'User does not exist'})
                 return
             }
             res.status(200).json(user)
         } else {
-            res.status(403).json({message: 'You don\'t have permission to access this resource'})
+            res.status(403).json('Forbidden')
         }
     } catch (e) {
         res.status(404).json(e)
@@ -42,23 +44,21 @@ router.post('/',
     async (req: express.Request, res: express.Response) => {
         try {
             const {name, phone, email, password} = req.body
-            const existingUser = await User.findOne({phone})
-            const existingUser2 = await User.findOne({email})
-            const existingUser3 = await User.findOne({name})
-            if (existingUser || existingUser2 || existingUser3) {
+            const existingUser = await User.findOne({ where: { [Op.or]: [{ name }, { phone }, { email }]}})
+
+            if (existingUser) {
                 return res.status(400).json({message: 'Such user exists'})
             }
 
-            const user = new User({name, phone, email, password, role: 'user'})
-            await user.save()
+            const hashed_password = await bcrypt.hash(password, 12)
+            const user: any = await User.create({name, phone, email, password: hashed_password, role: 'user'})
 
             const JWTKey = process.env.JWT_SECRET
-            const body = { _id: user._id, email: user.email }
+            const body = { email: user.email }
             const token = jwt.sign({ user: body }, JWTKey!)
 
-            return res.status(200).json({ token })
+            return res.status(200).json({ user, token })
         } catch (e) {
-            console.log(e)
             res.status(400).json({message: 'Incorrect data'})
         }
     })
@@ -66,22 +66,25 @@ router.post('/',
 router.patch('/:id', passport.authenticate('jwt', { session: false }),
     async (req: express.Request, res: express.Response) => {
         try {
-            if (req.user?.role === 'admin' || JSON.stringify(req.params.id) === JSON.stringify(req.user?._id)) {
-                const params = req.body
-                const user = await User.findById(req.params.id)
+            if (req.user?.role === 'admin' || req.params.id === JSON.stringify(req.user?.id)) {
+                const user = await User.findByPk(req.params.id)
+
 
                 if (!user) {
                     res.status(404).json({message: 'User does not exist'})
                     return
                 }
                 if (req.user?.role !== 'admin'){
-                    params.role = 'user'
+                    req.body.role = 'user'
                 }
-                Object.assign(user, params)
+                if (req.body.password) {
+                    req.body.password = await bcrypt.hash(req.body.password, 12)
+                }
+                user.set(req.body)
                 await user.save()
-                res.status(200).json('User updated')
+                res.status(200).json(user)
             } else {
-                res.status(403).json({message: 'You don\'t have permission to access this resource'})
+                res.status(403).json('Forbidden')
             }
         } catch (e) {
             res.status(404).json({message: 'Bad request'})
@@ -92,15 +95,15 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }),
     async (req, res) => {
     try {
         if (req.user?.role === 'admin') {
-            const user = await User.findById(req.params.id)
+            const user = await User.findByPk(req.params.id)
             if (!user) {
                 res.status(404).json({message: 'User does not exist'})
                 return
             }
-            await user.deleteOne()
-            res.status(200).json('User deleted')
+            await user.destroy()
+            res.status(200).json({ deleted: user.id })
         } else {
-            res.status(403).json({message: 'You don\'t have permission to access this resource'})
+            res.status(403).json({message: 'Forbidden'})
         }
     } catch (e) {
         res.status(404).json({message: 'Bad request'})

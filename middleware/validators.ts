@@ -1,11 +1,10 @@
 import Joi from "joi"
 import {Request, Response} from "express"
 import {Error} from "mongoose"
-import {User} from "../user/user.schema"
-import {Product} from "../product/product.schema"
+import {User} from "../user/user.model"
+import {Product} from "../catalog/product.model"
 
 const phoneJoi = Joi.extend(require('joi-phone-number'))
-const JoiObjectId = require('joi-objectid')(Joi)
 
 const userSchema = {
     name: Joi.string()
@@ -37,7 +36,9 @@ const productPostJoiSchema = Joi.object({
     description: Joi.string()
         .optional(),
     image: Joi.string()
-        .optional()
+        .optional(),
+    CategoryId: Joi.number()
+        .optional(),
 })
 
 const productPatchJoiSchema = Joi.object({
@@ -53,13 +54,15 @@ const productPatchJoiSchema = Joi.object({
     description: Joi.string()
         .optional(),
     image: Joi.string()
-        .optional()
+        .optional(),
+    CategoryId: Joi.number()
+        .optional(),
 })
 
 const existingUser = async (value: string) => {
     if (value) {
         try {
-            const user = await User.findById(value)
+            const user = await User.findByPk(value)
             if (!user) {
                 throw new Error('Record does not exist')
             }
@@ -73,7 +76,7 @@ const existingUser = async (value: string) => {
 const existingProduct = async (value: string) => {
     if (value) {
         try {
-            const user = await Product.findById(value)
+            const user = await Product.findByPk(value)
             if (!user) {
                 throw new Error('Record does not exist')
             }
@@ -84,31 +87,18 @@ const existingProduct = async (value: string) => {
     }
 }
 
-const orderPostJoiSchema = Joi.object({
-    user: JoiObjectId()
-        .external(existingUser)
-        .optional(),
-    product: JoiObjectId()
-        .external(existingProduct)
-        .required(),
-    qty: Joi.number()
-        .integer()
-        .min(1)
-        .required()
-})
+const orderSchema = {
+    UserId: Joi.number().external(existingUser).optional(),
+    status: Joi.string(),
+    rows: Joi.array().items(Joi.object({
+        ProductId: Joi.number().external(existingProduct).required(),
+        qty: Joi.number().required()
+    }))
+}
 
-const orderPatchJoiSchema = Joi.object({
-    user: JoiObjectId()
-        .external(existingUser)
-        .optional(),
-    product: JoiObjectId()
-        .external(existingProduct)
-        .optional(),
-    qty: Joi.number()
-        .integer()
-        .min(1)
-        .optional()
-})
+const orderPostJoiSchema = Joi.object(orderSchema)
+    .fork(Object.keys(orderSchema), (schema) => schema.required())
+const orderPatchJoiSchema = Joi.object(orderSchema)
 
 const authEmailJoiSchema = Joi.object({
     authField: Joi.string()
@@ -155,7 +145,7 @@ export async function dataValidation(req: Request, res: Response, next: any) {
             await schema[targetApi][req.method].validateAsync(req.body)
             next()
         } catch (e: any) {
-            res.status(404).json({message: e.message})
+            res.status(400).json({message: e.message})
         }
     }
 }

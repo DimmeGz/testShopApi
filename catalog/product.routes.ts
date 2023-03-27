@@ -1,8 +1,10 @@
 import express, {Router} from 'express'
+import passport from "../middleware/passport"
 
-import {Product} from './product.schema'
-import passport from "../middleware/passport";
+import {Product} from './product.model'
+import {OrderRow} from '../order/order.models'
 import {getPaginationParameters} from "../utils/functions"
+import {checkUserRole} from '../middleware/checkUserRole'
 
 export const router = Router()
 
@@ -12,24 +14,29 @@ router.get('/', async (req, res) => {
     const totalPages = Math.ceil(await Product.count() / elementsCount)
 
     try {
-        const data = await Product.find()
-            .sort({ _id: 1 })
-            .limit(elementsCount)
-            .skip(skipIndex)
-        res.json({page, totalPages, elementsCount, data})
+        const data = await Product.findAll({order: [['id', 'ASC']], offset: skipIndex, limit: elementsCount})
+        res.status(200).json({page, totalPages, elementsCount, data})
     } catch (e) {
         res.status(500).json({message: 'something went wrong'})
     }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkUserRole,
+    async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id)
+        const product = await Product.findByPk(req.params.id)
         if (!product) {
             res.status(404).json({message: 'Product does not exist'})
             return
         }
-        res.status(200).json(product)
+
+        if (req.userRole !== 'admin') {
+            res.status(200).json(product)
+        } else {
+            const orderRows = await OrderRow.findAll({where: {ProductId: product.id}})
+            const totalSales = orderRows.reduce(function (acc, obj) { return acc + obj.qty; }, 0)
+            res.status(200).json({product, totalSales})
+        }
     } catch (e) {
         res.status(404).json(e)
     }
@@ -39,15 +46,14 @@ router.post('/', passport.authenticate('jwt', { session: false }),
     async (req: express.Request, res: express.Response) => {
         try {
             if (req.user?.role === 'admin') {
-                const existingProduct = await Product.findOne({name: req.body.name})
+                const existingProduct = await Product.findOne({where: {name: req.body.name}})
                 if (existingProduct) {
                     return res.status(400).json({message: 'Such product exists'})
                 }
 
-                const product = new Product(req.body)
-                await product.save()
+                const product = await Product.create(req.body)
 
-                res.status(201).json('Product added')
+                res.status(201).json(product)
             } else {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
             }
@@ -60,16 +66,15 @@ router.patch('/:id', passport.authenticate('jwt', { session: false }),
     async (req: express.Request, res: express.Response) => {
         try {
             if (req.user?.role === 'admin') {
-                const params = req.body
-                const product = await Product.findById(req.params.id)
+                const product = await Product.findByPk(req.params.id)
 
                 if (!product) {
                     res.status(404).json({message: 'Product does not exist'})
                     return
                 }
-                Object.assign(product, params)
+                product.set(req.body)
                 await product.save()
-                res.status(200).json('Product updated')
+                res.status(200).json(product)
             } else {
                 res.status(403).json({message: 'You don\'t have permission to access this resource'})
             }
@@ -82,13 +87,13 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }),
     async (req, res) => {
     try {
         if (req.user?.role === 'admin') {
-            const product = await Product.findById(req.params.id)
+            const product = await Product.findByPk(req.params.id)
             if (!product) {
                 res.status(404).json({message: 'Product does not exist'})
                 return
             }
-            await product.deleteOne()
-            res.status(200).json('Product deleted')
+            await product.destroy()
+            res.status(200).json({ deleted: product.id })
         } else {
             res.status(403).json({message: 'You don\'t have permission to access this resource'})
         }
