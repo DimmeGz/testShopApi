@@ -22,13 +22,16 @@ async function calcOrderSum(OrderId: number, rows: any, status: string) {
     let resRows = []
     for (let row of rows) {
         const newRow = await OrderRow.create({OrderId, ProductId: row.ProductId, qty: row.qty})
-        if (status === 'completed') {
-            const product = await Product.findByPk(row.ProductId)
-            product!.buyersCount += 1
-            await product!.save()
-        }
-        resRows.push(newRow)
         const product = await Product.findByPk(row.ProductId)
+        if (status === 'completed') {
+            product!.buyersCount += 1
+            product!.count -= row.qty
+            await product!.save()
+        } else {
+            product!.count -= row.qty
+        }
+        await product!.save()
+        resRows.push(newRow)
         sum += row.qty * product!.price
     }
     return {sum, resRows}
@@ -114,11 +117,12 @@ router.patch('/:id',
             if (rows) {
                 // Delete existing orderRows from DB and set sum = 0
                 for (let oldRow of resRows) {
+                    const product = await Product.findByPk(oldRow.ProductId)
+                    product!.count -= oldRow.qty
                     if (order?.status === 'completed') {
-                        const product = await Product.findByPk(oldRow.ProductId)
                         product!.buyersCount -= 1
-                        await product!.save()
                     }
+                    await product!.save()
                     await oldRow.destroy()
                 }
                 resRows = []
@@ -165,11 +169,12 @@ router.delete('/:id', async (req, res) => {
 
         const rows = await OrderRow.findAll({where: {OrderId: order.id}})
         for (let row of rows) {
+            const product = await Product.findByPk(row.ProductId)
             if (order.status === 'completed') {
-                const product = await Product.findByPk(row.ProductId)
                 product!.buyersCount -= 1
-                await product!.save()
             }
+            product!.count -= row.qty += row.qty
+            await product!.save()
             await row.destroy()
         }
 
