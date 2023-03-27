@@ -3,14 +3,14 @@ import {sequelize} from '../utils/postgresqlConnect'
 import {Product} from './product.model'
 import {User} from '../user/user.model'
 
-interface CommentModel extends Model<InferAttributes<CommentModel>, InferCreationAttributes<CommentModel>> {
+interface RatingModel extends Model<InferAttributes<RatingModel>, InferCreationAttributes<RatingModel>> {
     id: CreationOptional<number>
-    ProductId: number
     UserId: number
-    text: string
+    ProductId: number
+    rating: number
 }
 
-export const Comment = sequelize.define<CommentModel>('Comment', {
+export const Rating = sequelize.define<RatingModel>('Rating', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -22,15 +22,17 @@ export const Comment = sequelize.define<CommentModel>('Comment', {
     UserId: {
         type: DataTypes.SMALLINT
     },
-    text: {
-        type: DataTypes.STRING,
-        allowNull: false,
+    rating: {
+        type: DataTypes.SMALLINT,
+        validate: {
+            min: 0,
+            max: 5
+        }
     }
 })
 
-Product.hasMany(Comment)
-Comment.belongsTo(Product)
+Product.hasMany(Rating)
+Rating.belongsTo(Product)
 
-User.hasMany(Comment)
-Comment.belongsTo(User)
-
+User.hasMany(Rating)
+Rating.belongsTo(User)
