@@ -118,7 +118,7 @@ router.patch('/:id',
                 // Delete existing orderRows from DB and set sum = 0
                 for (let oldRow of resRows) {
                     const product = await Product.findByPk(oldRow.ProductId)
-                    product!.count -= oldRow.qty
+                    product!.count += oldRow.qty
                     if (order?.status === 'completed') {
                         product!.buyersCount -= 1
                     }
@@ -134,13 +134,13 @@ router.patch('/:id',
                 sum = result.sum
                 resRows = result.resRows
             } else {
-                if (status && status !== 'completed' && order?.status === 'completed') {
+                if (status !== 'completed' && order?.status === 'completed') {
                     for (let row of resRows) {
                         const product = await Product.findByPk(row.ProductId)
                         product!.buyersCount -= 1
                         await product!.save()
                     }
-                } else if (status && status === 'completed' && order?.status !== 'completed') {
+                } else if (status === 'completed' && order?.status !== 'completed') {
                     for (let row of resRows) {
                         const product = await Product.findByPk(row.ProductId)
                         product!.buyersCount += 1
@@ -173,7 +173,7 @@ router.delete('/:id', async (req, res) => {
             if (order.status === 'completed') {
                 product!.buyersCount -= 1
             }
-            product!.count -= row.qty += row.qty
+            product!.count += row.qty
             await product!.save()
             await row.destroy()
         }
