@@ -6,3 +6,13 @@ export function getPaginationParameters(req: any){
 
     return {page, elementsCount, skipIndex}
 }
+
+interface IUserRole {
+    userRole: string
+}
+
+declare global {
+    namespace Express {
+        interface Request extends IUserRole {}
+    }
+}

@@ -23,7 +23,7 @@ router.post(
                         async (error) => {
                             if (error) return next(error)
 
-                            const body = { _id: user._id, email: user.email }
+                            const body = { email: user.email }
                             const token = jwt.sign({ user: body }, JWTKey!)
 
                             return res.json({ token })
