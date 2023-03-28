@@ -30,6 +30,9 @@ async function calcOrderSum(OrderId: number, rows: any, status: string) {
         } else {
             product!.count -= row.qty
         }
+        if (product!.count <= 0) {
+            product!.isAvailable = false
+        }
         await product!.save()
         resRows.push(newRow)
         sum += row.qty * product!.price
@@ -119,6 +122,9 @@ router.patch('/:id',
                 for (let oldRow of resRows) {
                     const product = await Product.findByPk(oldRow.ProductId)
                     product!.count += oldRow.qty
+                    if (product!.count > 0) {
+                        product!.isAvailable = false
+                    }
                     if (order?.status === 'completed') {
                         product!.buyersCount -= 1
                     }
@@ -174,6 +180,9 @@ router.delete('/:id', async (req, res) => {
                 product!.buyersCount -= 1
             }
             product!.count += row.qty
+            if (product!.count > 0) {
+                product!.isAvailable = true
+            }
             await product!.save()
             await row.destroy()
         }
